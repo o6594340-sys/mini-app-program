@@ -29,6 +29,9 @@
   <aside class="sidebar">
     <div class="sidebar-logo">🏯 Организатор</div>
     <nav class="sidebar-nav">
+      <div class="nav-group-label">AI</div>
+      <button class="nav-btn" onclick="Admin.showSection('ai-import', this)">🤖 AI-импорт</button>
+
       <div class="nav-group-label">Направление</div>
       <button class="nav-btn" onclick="Admin.showSection('templates', this)">🌍 Шаблон страны</button>
 
@@ -58,6 +61,46 @@
   </aside>
 
   <main class="admin-main">
+
+    <!-- AI IMPORT -->
+    <section id="section-ai-import" class="admin-section hidden">
+      <div class="section-header">
+        <h2>🤖 AI-импорт программы</h2>
+        <p>Вставьте текст из Word или PDF — Claude автоматически разберёт программу по дням, деловые сессии и данные отеля.</p>
+      </div>
+
+      <div class="form-group">
+        <label>API-ключ Claude (Anthropic)</label>
+        <div class="ai-key-row">
+          <input type="password" id="ai-api-key" placeholder="sk-ant-...">
+          <button class="btn-secondary" onclick="Admin.saveApiKey()">Сохранить ключ</button>
+        </div>
+        <div class="ai-key-hint">Ключ хранится только в вашем браузере. Получить на <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys.</div>
+      </div>
+
+      <div class="form-group">
+        <label>Текст программы (из Word или PDF)</label>
+        <textarea id="ai-program-text" rows="14"
+          placeholder="Вставьте сюда текст программы мероприятия...&#10;&#10;Например:&#10;День 1 — 18 ноября, понедельник&#10;14:00 Прилёт, встреча в аэропорту PEK&#10;15:30 Трансфер в отель Marriott&#10;20:00 Приветственный ужин&#10;..."></textarea>
+      </div>
+
+      <div class="ai-parse-row">
+        <button class="btn-primary" onclick="Admin.parseWithAI()" id="ai-parse-btn">🤖 Разобрать с AI</button>
+        <span id="ai-status" class="ai-status"></span>
+      </div>
+
+      <div id="ai-result" class="hidden">
+        <div class="ai-result-header">
+          <h3>✅ Программа разобрана</h3>
+          <p id="ai-result-summary"></p>
+        </div>
+        <div id="ai-result-preview"></div>
+        <div class="ai-apply-row">
+          <button class="btn-primary" onclick="Admin.applyAIResult()">Загрузить в приложение</button>
+          <button class="btn-secondary" onclick="Admin.discardAIResult()">Отмена</button>
+        </div>
+      </div>
+    </section>
 
     <!-- BRAND KITS -->
     <section id="section-brandkits" class="admin-section hidden">

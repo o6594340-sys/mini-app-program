@@ -148,6 +148,7 @@ const Admin = (() => {
     if (name === 'cuisine')     renderCuisineSection();
     if (name === 'history')     renderHistorySection();
     if (name === 'brandkits')   renderBrandKitsSection();
+    if (name === 'ai-import')   loadAiSection();
   }
 
   /* ─── TEMPLATES ──────────────────────── */
@@ -1234,6 +1235,171 @@ const Admin = (() => {
     showToast('Пресет удалён');
   }
 
+  /* ─── AI IMPORT ──────────────────────── */
+  let aiResult = null;
+
+  function loadAiSection() {
+    const key = localStorage.getItem('admin_ai_key') || '';
+    if (key) document.getElementById('ai-api-key').value = key;
+  }
+
+  function saveApiKey() {
+    const key = document.getElementById('ai-api-key').value.trim();
+    if (!key) { showToast('Введите API-ключ'); return; }
+    localStorage.setItem('admin_ai_key', key);
+    showToast('API-ключ сохранён');
+  }
+
+  async function parseWithAI() {
+    const apiKey = document.getElementById('ai-api-key').value.trim() || localStorage.getItem('admin_ai_key') || '';
+    const text   = document.getElementById('ai-program-text').value.trim();
+    const btn    = document.getElementById('ai-parse-btn');
+    const status = document.getElementById('ai-status');
+
+    if (!apiKey) { showToast('Введите API-ключ Claude'); return; }
+    if (!text)   { showToast('Вставьте текст программы'); return; }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Разбираю...';
+    status.textContent = 'Отправляю запрос к Claude...';
+    document.getElementById('ai-result').classList.add('hidden');
+
+    const prompt = `Разбери текст программы мероприятия и верни строго валидный JSON (без markdown, только JSON):
+
+{
+  "event": { "title": "название", "dates": "даты", "location": "город, страна" },
+  "days": [
+    {
+      "id": 1, "label": "День 1", "date": "18 ноября, понедельник",
+      "theme": "тема дня", "color": "#C9353F",
+      "activities": [
+        { "time": "10:00", "title": "...", "location": "...", "type": "business", "note": null }
+      ]
+    }
+  ],
+  "business": [
+    { "id": "b1", "time": "10:00", "day": "День 2", "duration": "90 мин", "track": null, "title": "...", "speakers": ["Имя — должность"], "room": "...", "desc": "..." }
+  ],
+  "hotel": { "name": "...", "address": "...", "phone": "...", "checkin": "15:00", "checkout": "12:00", "desc": "..." }
+}
+
+Правила:
+- type для activities: business, meal, transfer, excursion, hotel, dinner, gala, free, break, arrival, key
+- color для дней: День1=#C9353F, День2=#1D4ED8, День3=#047857, День4=#7C3AED, далее по кругу
+- Деловые сессии (спикеры, треки, залы) — выноси в массив "business", не в "days"
+- Если данных нет — пустые массивы или null
+- Верни ТОЛЬКО JSON
+
+ТЕКСТ:
+${text}`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-allow-browser': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 4096,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || `HTTP ${res.status}`);
+      }
+
+      const data     = await res.json();
+      const rawText  = data.content[0].text.trim();
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Не удалось извлечь JSON из ответа');
+
+      aiResult = JSON.parse(jsonMatch[0]);
+      showAIPreview(aiResult);
+      status.textContent = '';
+    } catch (err) {
+      status.textContent = '❌ ' + err.message;
+      showToast('Ошибка: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🤖 Разобрать с AI';
+    }
+  }
+
+  function showAIPreview(result) {
+    const daysCount  = (result.days || []).length;
+    const actsCount  = (result.days || []).reduce((n, d) => n + (d.activities || []).length, 0);
+    const bizCount   = (result.business || []).length;
+
+    document.getElementById('ai-result-summary').textContent =
+      `Найдено: ${daysCount} дн., ${actsCount} активностей, ${bizCount} деловых сессий`;
+
+    let html = '';
+    if (result.event?.title) {
+      html += `<div class="ai-preview-block"><strong>📋 ${result.event.title}</strong> · ${result.event.dates || ''} · ${result.event.location || ''}</div>`;
+    }
+    (result.days || []).forEach(day => {
+      html += `<div class="ai-preview-block">
+        <strong style="color:${day.color}">${day.label} — ${day.date}</strong>
+        ${(day.activities || []).map(a => `<div class="ai-preview-item">⏰ ${a.time} &nbsp; ${a.title} · 📍 ${a.location || '—'}</div>`).join('')}
+      </div>`;
+    });
+    if (bizCount) {
+      html += `<div class="ai-preview-block"><strong>💼 Деловые сессии</strong>`;
+      (result.business || []).forEach(s => {
+        html += `<div class="ai-preview-item">${s.day} · ${s.time} · ${s.title}</div>`;
+      });
+      html += `</div>`;
+    }
+    if (result.hotel?.name) {
+      html += `<div class="ai-preview-block"><strong>🏨 Отель:</strong> ${result.hotel.name}</div>`;
+    }
+
+    document.getElementById('ai-result-preview').innerHTML = html;
+    document.getElementById('ai-result').classList.remove('hidden');
+  }
+
+  function applyAIResult() {
+    if (!aiResult) return;
+
+    if (aiResult.event && Object.keys(aiResult.event).length) {
+      const cur = getStored(KEYS.event) || JSON.parse(JSON.stringify(EVENT));
+      const merged = { ...cur, ...aiResult.event };
+      save(KEYS.event, merged);
+      state.event = merged;
+    }
+    if ((aiResult.days || []).length) {
+      save(KEYS.days, aiResult.days);
+      state.days = aiResult.days;
+    }
+    if ((aiResult.business || []).length) {
+      save(KEYS.business, aiResult.business);
+      state.business = aiResult.business;
+    }
+    if (aiResult.hotel?.name) {
+      const cur = getStored(KEYS.hotel) || JSON.parse(JSON.stringify(HOTEL));
+      const merged = { ...cur, ...aiResult.hotel };
+      save(KEYS.hotel, merged);
+      state.hotel = merged;
+    }
+
+    aiResult = null;
+    document.getElementById('ai-result').classList.add('hidden');
+    document.getElementById('ai-program-text').value = '';
+    loadSettingsForm();
+    showToast('✅ Программа загружена в приложение!');
+  }
+
+  function discardAIResult() {
+    aiResult = null;
+    document.getElementById('ai-result').classList.add('hidden');
+  }
+
   /* ─── BACKUP / RESTORE ────────────────── */
   function exportData() {
     const backup = { _version: 1, _exported: new Date().toISOString() };
@@ -1329,6 +1495,8 @@ const Admin = (() => {
     selectGradient,
     selectCardStyle,
     selectMotion,
+    // ai import
+    saveApiKey, parseWithAI, applyAIResult, discardAIResult,
     // brand kits
     saveBrandKit, applyBrandKit, deleteBrandKit,
     // emoji
