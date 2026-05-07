@@ -1238,98 +1238,78 @@ const Admin = (() => {
   /* ─── AI IMPORT ──────────────────────── */
   let aiResult = null;
 
-  function loadAiSection() {
-    const key = localStorage.getItem('admin_ai_key') || '';
-    if (key) document.getElementById('ai-api-key').value = key;
-  }
+  function loadAiSection() {}
 
-  function saveApiKey() {
-    const key = document.getElementById('ai-api-key').value.trim();
-    if (!key) { showToast('Введите API-ключ'); return; }
-    localStorage.setItem('admin_ai_key', key);
-    showToast('API-ключ сохранён');
-  }
+  function saveApiKey() {}
 
-  async function parseWithAI() {
-    const apiKey = document.getElementById('ai-api-key').value.trim() || localStorage.getItem('admin_ai_key') || '';
-    const text   = document.getElementById('ai-program-text').value.trim();
-    const btn    = document.getElementById('ai-parse-btn');
-    const status = document.getElementById('ai-status');
-
-    if (!apiKey) { showToast('Введите API-ключ Claude'); return; }
-    if (!text)   { showToast('Вставьте текст программы'); return; }
-
-    btn.disabled = true;
-    btn.textContent = '⏳ Разбираю...';
-    status.textContent = 'Отправляю запрос к Claude...';
-    document.getElementById('ai-result').classList.add('hidden');
-
-    const prompt = `Разбери текст программы мероприятия и верни строго валидный JSON (без markdown, только JSON):
+  function buildPrompt(text) {
+    return `Разбери текст программы мероприятия и верни строго валидный JSON (без markdown-блоков, только чистый JSON):
 
 {
-  "event": { "title": "название", "dates": "даты", "location": "город, страна" },
+  "event": { "title": "название события", "dates": "даты", "location": "город, страна" },
   "days": [
     {
       "id": 1, "label": "День 1", "date": "18 ноября, понедельник",
       "theme": "тема дня", "color": "#C9353F",
       "activities": [
-        { "time": "10:00", "title": "...", "location": "...", "type": "business", "note": null }
+        { "time": "10:00", "title": "название", "location": "место", "type": "meal", "note": null }
       ]
     }
   ],
   "business": [
-    { "id": "b1", "time": "10:00", "day": "День 2", "duration": "90 мин", "track": null, "title": "...", "speakers": ["Имя — должность"], "room": "...", "desc": "..." }
+    { "id": "b1", "time": "10:00", "day": "День 2", "duration": "90 мин", "track": null, "title": "название сессии", "speakers": ["Имя — должность"], "room": "зал", "desc": "описание" }
   ],
-  "hotel": { "name": "...", "address": "...", "phone": "...", "checkin": "15:00", "checkout": "12:00", "desc": "..." }
+  "hotel": { "name": "название", "address": "адрес", "phone": "телефон", "checkin": "15:00", "checkout": "12:00", "desc": "описание" }
 }
 
 Правила:
 - type для activities: business, meal, transfer, excursion, hotel, dinner, gala, free, break, arrival, key
-- color для дней: День1=#C9353F, День2=#1D4ED8, День3=#047857, День4=#7C3AED, далее по кругу
-- Деловые сессии (спикеры, треки, залы) — выноси в массив "business", не в "days"
-- Если данных нет — пустые массивы или null
-- Верни ТОЛЬКО JSON
+- color для дней: День1=#C9353F, День2=#1D4ED8, День3=#047857, День4=#7C3AED, День5 и далее=#6B7280
+- Деловые сессии со спикерами → в массив "business", не в "days"
+- Если данных нет — пустые массивы [] или null
+- Верни ТОЛЬКО JSON, без пояснений
 
-ТЕКСТ:
+ТЕКСТ ПРОГРАММЫ:
 ${text}`;
+  }
 
+  function copyPrompt() {
+    const text = document.getElementById('ai-program-text').value.trim();
+    if (!text) { showToast('Сначала вставьте текст программы'); return; }
+    const prompt = buildPrompt(text);
+    navigator.clipboard.writeText(prompt).then(() => {
+      document.getElementById('ai-status').textContent = '✅ Промпт скопирован — вставьте в claude.ai';
+      showToast('Промпт скопирован!');
+    }).catch(() => {
+      // fallback: select a temp textarea
+      const ta = document.createElement('textarea');
+      ta.value = prompt;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      document.getElementById('ai-status').textContent = '✅ Промпт скопирован — вставьте в claude.ai';
+      showToast('Промпт скопирован!');
+    });
+  }
+
+  function loadFromJSON() {
+    const raw    = document.getElementById('ai-json-text').value.trim();
+    const status = document.getElementById('ai-json-status');
+    if (!raw) { showToast('Вставьте JSON от Claude'); return; }
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-allow-browser': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 4096,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message || `HTTP ${res.status}`);
-      }
-
-      const data     = await res.json();
-      const rawText  = data.content[0].text.trim();
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('Не удалось извлечь JSON из ответа');
-
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('JSON не найден');
       aiResult = JSON.parse(jsonMatch[0]);
       showAIPreview(aiResult);
       status.textContent = '';
     } catch (err) {
-      status.textContent = '❌ ' + err.message;
-      showToast('Ошибка: ' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '🤖 Разобрать с AI';
+      status.textContent = '❌ Ошибка: ' + err.message;
+      showToast('Не удалось разобрать JSON: ' + err.message);
     }
   }
+
+  async function parseWithAI() {}
 
   function showAIPreview(result) {
     const daysCount  = (result.days || []).length;
