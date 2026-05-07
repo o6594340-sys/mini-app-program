@@ -406,7 +406,7 @@ const App = (() => {
     `).join('');
 
     container.innerHTML = `
-      <img class="hotel-photo" src="${h.image}" alt="${h.name}" loading="lazy">
+      <img class="hotel-photo" src="${h.image}" alt="${h.name}">
       <div class="section-pad">
 
         <div class="hotel-name-block">
@@ -469,7 +469,7 @@ const App = (() => {
     getSights().forEach(s => {
       html += `
         <div class="sight-card">
-          <img class="sight-img" src="${s.image}" alt="${s.title}" loading="lazy">
+          <img class="sight-img" src="${s.image}" alt="${s.title}">
           <div class="sight-body">
             <div class="sight-tags">${s.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
             <h3 class="sight-title">${s.emoji} ${s.title}</h3>
@@ -511,7 +511,7 @@ const App = (() => {
   function restaurantCard(r) {
     return `
       <div class="rest-card">
-        <img class="rest-img" src="${r.image}" alt="${r.title}" loading="lazy">
+        <img class="rest-img" src="${r.image}" alt="${r.title}">
         <div class="rest-body">
           <div class="rest-header">
             <div>
