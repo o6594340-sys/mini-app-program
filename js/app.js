@@ -34,7 +34,7 @@ const App = (() => {
     break: '☕', arrival: '📍', key: '🔑', default: '📌',
   };
 
-  let state = { tab: 'today', programDay: TODAY_INDEX };
+  let state = { tab: 'program', programDay: TODAY_INDEX };
 
   /* ─── BRANDING ───────────────────────── */
   function applyBranding() {
@@ -175,7 +175,7 @@ const App = (() => {
     applyMotion();
     applyCardStyle();
     renderAnnouncement();
-    renderToday();
+    renderProgram();
   }
 
   /* ─── ANNOUNCEMENT BANNER ─────────────── */
@@ -204,10 +204,8 @@ const App = (() => {
     state.tab = tab;
 
     const renderers = {
-      today: renderToday, program: renderProgram, business: renderBusiness,
-      hotel: renderHotel, sights: renderSights,
-      restaurants: renderRestaurants, cuisine: renderCuisine,
-      history: renderHistory,
+      program: renderProgram, hotel: renderHotel, sights: renderSights,
+      cuisine: renderCuisine, history: renderHistory, contacts: renderContacts,
     };
     if (renderers[tab]) renderers[tab]();
   }
@@ -343,7 +341,35 @@ const App = (() => {
     });
     items += `</div></div>`;
 
-    container.innerHTML = `<div class="section-pad">${tabs}${items}</div>`;
+    // деловая программа для этого дня
+    const dayLabel = day.label;
+    const trackColors = { A: '#C9353F', B: '#1D4ED8', C: '#047857' };
+    const daySessions = getBusiness().filter(s => s.day === dayLabel);
+    let businessHtml = '';
+    if (daySessions.length) {
+      businessHtml += `<div class="section-title" style="margin-top:24px">💼 Деловая программа</div>`;
+      daySessions.forEach(s => {
+        const tc = s.track ? trackColors[s.track] : '#6B7280';
+        businessHtml += `
+          <div class="business-card">
+            <div class="business-header">
+              <div>
+                <div class="business-time">${s.time} · ${s.duration}</div>
+                <div class="business-title">${s.title}</div>
+              </div>
+              ${s.track ? `<span class="track-badge" style="background:${tc}22;color:${tc}">Трек ${s.track}</span>` : ''}
+            </div>
+            <div class="business-meta">🏛 ${s.room}</div>
+            <div class="business-desc">${s.desc}</div>
+            <div class="speakers-list">
+              ${s.speakers.map(sp => `<div class="speaker-item">👤 ${sp}</div>`).join('')}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    container.innerHTML = `<div class="section-pad">${tabs}${items}${businessHtml}</div>`;
   }
 
   function selectProgramDay(i) {
@@ -455,6 +481,23 @@ const App = (() => {
           <div class="hotel-address-cn">${h.addressCn || ''}</div>
           <div class="hotel-address-en">${h.address || ''}</div>
         </div>
+
+        <div class="section-title" style="margin-top:24px;margin-bottom:12px">📍 Рядом пешком</div>
+        ${NEARBY.map(cat => `
+          <div class="nearby-category">
+            <div class="nearby-cat-title">${cat.emoji} ${cat.category}</div>
+            ${cat.places.map(p => `
+              <div class="nearby-item">
+                <span class="nearby-icon">${p.icon}</span>
+                <div class="nearby-info">
+                  <div class="nearby-title">${p.title}</div>
+                  <div class="nearby-distance">${p.distance}</div>
+                  <div class="nearby-note">${p.note}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `).join('')}
 
       </div>
     `;
@@ -627,6 +670,35 @@ const App = (() => {
     container.innerHTML = html;
   }
 
+  /* ─── CONTACTS ──────────────────────────*/
+  function renderContacts() {
+    const container = document.getElementById('tab-contacts');
+    let html = `<div class="section-pad">`;
+    html += `<div class="section-title">Контакты</div>`;
+
+    CONTACTS.forEach(c => {
+      html += `
+        <div class="contact-card ${c.accent ? 'contact-accent' : ''}">
+          <div class="contact-header">
+            <span class="contact-emoji">${c.emoji}</span>
+            <div class="contact-info">
+              <div class="contact-role">${c.role}</div>
+              <div class="contact-name">${c.name}</div>
+              <div class="contact-note">${c.note}</div>
+            </div>
+          </div>
+          <div class="contact-actions">
+            <a class="contact-btn" href="tel:${c.phone}">📞 ${c.phone}</a>
+            ${c.telegram ? `<a class="contact-btn contact-btn-tg" href="https://t.me/${c.telegram.replace('@','')}">${c.telegram}</a>` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
+  }
+
   /* ─── FAQ ─────────────────────────────── */
   function openFAQ() {
     renderFAQ(FAQ);
@@ -673,6 +745,7 @@ const App = (() => {
     selectProgramDay,
     copyWifi,
     openFAQ, closeFAQ, searchFAQ, toggleFAQ,
+    renderContacts,
   };
 
 })();

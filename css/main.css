@@ -775,6 +775,53 @@ body {
   font-size: 12px; color: rgba(255,255,255,0.55);
 }
 
+/* ===== NEARBY (HOTEL TAB) ===== */
+.nearby-category { margin-bottom: 20px; }
+.nearby-cat-title {
+  font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-hint); margin-bottom: 10px;
+}
+.nearby-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.nearby-item:last-child { border-bottom: none; }
+.nearby-icon { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; margin-top: 2px; }
+.nearby-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.nearby-distance { font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 2px; }
+.nearby-note { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+/* ===== CONTACTS TAB ===== */
+.contact-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.contact-card.contact-accent {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.contact-header { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.contact-emoji { font-size: 28px; flex-shrink: 0; }
+.contact-role { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-hint); margin-bottom: 2px; }
+.contact-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.contact-note { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.contact-btn {
+  display: inline-flex; align-items: center;
+  padding: 8px 14px;
+  border-radius: 100px;
+  font-size: 13px; font-weight: 600;
+  text-decoration: none;
+  background: var(--text); color: white;
+}
+.contact-btn-tg { background: #229ED9; }
+
 /* ===== TYPOGRAPHY UTILS ===== */
 h2 { font-family: var(--font-disp); font-size: 19px; font-weight: 700; }
 h3 { font-size: 15px; font-weight: 700; }

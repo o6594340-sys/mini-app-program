@@ -620,3 +620,97 @@ const HISTORY = [
     ],
   },
 ];
+
+const NEARBY = [
+  {
+    category: 'Торговые центры',
+    emoji: '🛍',
+    places: [
+      { icon: '🏬', title: 'China World Mall', distance: '0 мин · в здании отеля', note: '6 этажей. Аптека, банкомат, продукты, сувениры, рестораны' },
+      { icon: '🏬', title: 'Shin Kong Place', distance: '10 мин пешком', note: 'Люксовые бренды, супермаркет на -1 этаже' },
+      { icon: '🏬', title: 'CITIC Plaza', distance: '15 мин пешком', note: 'Офисный комплекс, кафе, аптека' },
+    ],
+  },
+  {
+    category: 'Парки и прогулки',
+    emoji: '🌿',
+    places: [
+      { icon: '🌳', title: 'Ritan Park · 日坛公园', distance: '15 мин пешком', note: 'Парк Храма Солнца. Утром — тайцзи, кафе на берегу пруда. Вход 1¥' },
+      { icon: '🌊', title: 'CBD Central Park', distance: '10 мин пешком', note: 'Современный парк в деловом центре. Фонтаны, скамейки, зелень' },
+    ],
+  },
+  {
+    category: 'Метро и транспорт',
+    emoji: '🚇',
+    places: [
+      { icon: '🚇', title: 'Ст. Guomao · 国贸', distance: '3 мин пешком', note: 'Линии 1 и 10. Прямо до Тяньаньмэнь, Вокзала, аэропорта' },
+      { icon: '🚕', title: 'Стойка такси', distance: '0 мин · выход из отеля', note: 'Консьерж запишет адрес на китайском — покажите водителю' },
+    ],
+  },
+  {
+    category: 'Еда и кофе рядом',
+    emoji: '☕',
+    places: [
+      { icon: '☕', title: 'Starbucks', distance: '2 мин · в China World Mall', note: 'B1 этаж торгового центра. 06:30–22:00' },
+      { icon: '🍜', title: 'Ресторанный двор China World Mall', distance: '5 мин · B1 этаж', note: 'Китайская, японская, западная кухня. Цены умеренные' },
+      { icon: '🏪', title: '7-Eleven', distance: '3 мин · выход из mall', note: 'Круглосуточно. Вода, снеки, готовая еда' },
+    ],
+  },
+];
+
+const CONTACTS = [
+  {
+    role: 'Организатор',
+    name: 'Анна Петрова',
+    phone: '+7 999 000 00 00',
+    telegram: '@anna_mice',
+    note: 'Все вопросы по программе и организации',
+    emoji: '👩‍💼',
+    accent: true,
+  },
+  {
+    role: 'Координатор на месте',
+    name: 'Имя Фамилия',
+    phone: '+7 999 000 00 01',
+    telegram: '@coordinator',
+    note: 'Логистика, трансферы, размещение',
+    emoji: '🗂',
+    accent: false,
+  },
+  {
+    role: 'Гид',
+    name: 'Имя Фамилия',
+    phone: '+86 138 0000 0000',
+    telegram: null,
+    note: 'Экскурсии, переводчик, помощь в Пекине',
+    emoji: '🧭',
+    accent: false,
+  },
+  {
+    role: 'Отель · China World Hotel',
+    name: 'Стойка регистрации',
+    phone: '+86 10 6505 2266',
+    telegram: null,
+    note: 'Круглосуточно. Вопросы по номеру, услуги, такси',
+    emoji: '🏨',
+    accent: false,
+  },
+  {
+    role: 'Скорая помощь',
+    name: 'Экстренные службы КНР',
+    phone: '120',
+    telegram: null,
+    note: 'Медицинская помощь. Также: полиция 110, пожарные 119',
+    emoji: '🚑',
+    accent: false,
+  },
+  {
+    role: 'Консульство РФ в Пекине',
+    name: 'Дежурный консул',
+    phone: '+86 10 6532 1267',
+    telegram: null,
+    note: 'Экстренная консульская помощь гражданам РФ',
+    emoji: '🇷🇺',
+    accent: false,
+  },
+];
