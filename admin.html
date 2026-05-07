@@ -30,7 +30,7 @@
     <div class="sidebar-logo">🏯 Организатор</div>
     <nav class="sidebar-nav">
       <div class="nav-group-label">AI</div>
-      <button class="nav-btn" onclick="Admin.showSection('ai-import', this)">🤖 AI-импорт</button>
+      <button class="nav-btn" onclick="Admin.showSection('ai-import', this)">📥 Импорт программы</button>
 
       <div class="nav-group-label">Направление</div>
       <button class="nav-btn" onclick="Admin.showSection('templates', this)">🌍 Шаблон страны</button>
@@ -65,37 +65,43 @@
     <!-- AI IMPORT -->
     <section id="section-ai-import" class="admin-section hidden">
       <div class="section-header">
-        <h2>🤖 AI-импорт программы</h2>
-        <p>Вставьте текст из Word или PDF — Claude автоматически разберёт программу по дням, деловые сессии и данные отеля.</p>
+        <h2>📥 Импорт программы</h2>
+        <p>Наберите или вставьте текст программы по шаблону — приложение разберёт автоматически, без внешних сервисов.</p>
       </div>
 
-      <div class="ai-steps-box">
-        <div class="ai-step"><span class="ai-step-num">1</span> Вставь текст программы из Word/PDF в поле ниже</div>
-        <div class="ai-step"><span class="ai-step-num">2</span> Нажми «Скопировать промпт» — промпт скопируется в буфер</div>
-        <div class="ai-step"><span class="ai-step-num">3</span> Открой <a href="https://claude.ai" target="_blank">claude.ai</a>, вставь и отправь</div>
-        <div class="ai-step"><span class="ai-step-num">4</span> Скопируй ответ Claude (JSON), вставь в нижнее поле</div>
-        <div class="ai-step"><span class="ai-step-num">5</span> Нажми «Загрузить в приложение»</div>
+      <div class="import-template-box">
+        <div class="import-template-header">
+          <strong>Шаблон формата</strong>
+          <button class="btn-small" onclick="Admin.copyTemplate()">📋 Скопировать шаблон</button>
+        </div>
+        <pre class="import-template-pre">День 1 | 18 ноября, понедельник
+09:00 | Завтрак в ресторане отеля
+10:30 | Трансфер до конференц-центра
+11:00 | Деловая: Открытие форума
+13:00 | Обед
+19:00 | Приветственный ужин
+
+День 2 | 19 ноября, вторник
+09:00 | Завтрак
+10:00 | Деловая: Круглый стол
+13:30 | Обед
+15:00 | Экскурсия по городу</pre>
+      </div>
+
+      <div class="import-hint-box">
+        <span>💡</span>
+        <span>Поддерживаются разделители <strong>|</strong> и <strong>—</strong>. Деловые сессии начинаются с <strong>Деловая:</strong></span>
       </div>
 
       <div class="form-group">
-        <label>Шаг 1 — Текст программы (из Word или PDF)</label>
-        <textarea id="ai-program-text" rows="10"
-          placeholder="Вставьте сюда текст программы мероприятия...&#10;&#10;Например:&#10;День 1 — 18 ноября&#10;14:00 Прилёт, встреча в аэропорту&#10;15:30 Трансфер в отель Marriott&#10;20:00 Приветственный ужин&#10;..."></textarea>
+        <label>Текст программы</label>
+        <textarea id="ai-program-text" rows="12"
+          placeholder="Вставьте или наберите программу по шаблону..."></textarea>
       </div>
 
       <div class="ai-parse-row">
-        <button class="btn-primary" onclick="Admin.copyPrompt()" id="ai-copy-btn">📋 Скопировать промпт</button>
+        <button class="btn-primary" onclick="Admin.parseProgram()" id="ai-parse-btn">🔍 Разобрать программу</button>
         <span id="ai-status" class="ai-status"></span>
-      </div>
-
-      <div class="form-group" style="margin-top:24px">
-        <label>Шаг 4 — Вставь ответ от Claude (JSON)</label>
-        <textarea id="ai-json-text" rows="8" placeholder='{"event": {...}, "days": [...], ...}'></textarea>
-      </div>
-
-      <div class="ai-parse-row">
-        <button class="btn-primary" onclick="Admin.loadFromJSON()">✅ Загрузить в приложение</button>
-        <span id="ai-json-status" class="ai-status"></span>
       </div>
 
       <div id="ai-result" class="hidden">

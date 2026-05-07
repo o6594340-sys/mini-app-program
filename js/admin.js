@@ -1235,81 +1235,99 @@ const Admin = (() => {
     showToast('Пресет удалён');
   }
 
-  /* ─── AI IMPORT ──────────────────────── */
+  /* ─── IMPORT ──────────────────────── */
   let aiResult = null;
 
-  function loadAiSection() {}
+  const IMPORT_TEMPLATE = `День 1 | 18 ноября, понедельник
+09:00 | Завтрак в ресторане отеля
+10:30 | Трансфер до конференц-центра
+11:00 | Деловая: Открытие форума
+13:00 | Обед
+19:00 | Приветственный ужин
 
-  function saveApiKey() {}
+День 2 | 19 ноября, вторник
+09:00 | Завтрак
+10:00 | Деловая: Круглый стол
+13:30 | Обед
+15:00 | Экскурсия по городу`;
 
-  function buildPrompt(text) {
-    return `Разбери текст программы мероприятия и верни строго валидный JSON (без markdown-блоков, только чистый JSON):
-
-{
-  "event": { "title": "название события", "dates": "даты", "location": "город, страна" },
-  "days": [
-    {
-      "id": 1, "label": "День 1", "date": "18 ноября, понедельник",
-      "theme": "тема дня", "color": "#C9353F",
-      "activities": [
-        { "time": "10:00", "title": "название", "location": "место", "type": "meal", "note": null }
-      ]
-    }
-  ],
-  "business": [
-    { "id": "b1", "time": "10:00", "day": "День 2", "duration": "90 мин", "track": null, "title": "название сессии", "speakers": ["Имя — должность"], "room": "зал", "desc": "описание" }
-  ],
-  "hotel": { "name": "название", "address": "адрес", "phone": "телефон", "checkin": "15:00", "checkout": "12:00", "desc": "описание" }
-}
-
-Правила:
-- type для activities: business, meal, transfer, excursion, hotel, dinner, gala, free, break, arrival, key
-- color для дней: День1=#C9353F, День2=#1D4ED8, День3=#047857, День4=#7C3AED, День5 и далее=#6B7280
-- Деловые сессии со спикерами → в массив "business", не в "days"
-- Если данных нет — пустые массивы [] или null
-- Верни ТОЛЬКО JSON, без пояснений
-
-ТЕКСТ ПРОГРАММЫ:
-${text}`;
-  }
-
-  function copyPrompt() {
-    const text = document.getElementById('ai-program-text').value.trim();
-    if (!text) { showToast('Сначала вставьте текст программы'); return; }
-    const prompt = buildPrompt(text);
-    navigator.clipboard.writeText(prompt).then(() => {
-      document.getElementById('ai-status').textContent = '✅ Промпт скопирован — вставьте в claude.ai';
-      showToast('Промпт скопирован!');
+  function copyTemplate() {
+    navigator.clipboard.writeText(IMPORT_TEMPLATE).then(() => {
+      showToast('Шаблон скопирован!');
     }).catch(() => {
-      // fallback: select a temp textarea
       const ta = document.createElement('textarea');
-      ta.value = prompt;
+      ta.value = IMPORT_TEMPLATE;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand('copy');
       document.body.removeChild(ta);
-      document.getElementById('ai-status').textContent = '✅ Промпт скопирован — вставьте в claude.ai';
-      showToast('Промпт скопирован!');
+      showToast('Шаблон скопирован!');
     });
   }
 
-  function loadFromJSON() {
-    const raw    = document.getElementById('ai-json-text').value.trim();
-    const status = document.getElementById('ai-json-status');
-    if (!raw) { showToast('Вставьте JSON от Claude'); return; }
-    try {
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('JSON не найден');
-      aiResult = JSON.parse(jsonMatch[0]);
-      showAIPreview(aiResult);
-      status.textContent = '';
-    } catch (err) {
-      status.textContent = '❌ Ошибка: ' + err.message;
-      showToast('Не удалось разобрать JSON: ' + err.message);
+  function parseImportText(text) {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const days = [];
+    let currentDay = null;
+    let dayIndex = 0;
+    const business = [];
+    const DAY_COLORS = ['#C9353F', '#1D4ED8', '#047857', '#7C3AED', '#EA580C', '#6B7280'];
+
+    for (const line of lines) {
+      const dayMatch = line.match(/^(?:день|day)\s*(\d+)\s*[|—\-–:.]?\s*(.+)/i);
+      if (dayMatch) {
+        dayIndex++;
+        currentDay = {
+          id: dayIndex,
+          label: `День ${dayIndex}`,
+          date: dayMatch[2].trim(),
+          theme: '',
+          color: DAY_COLORS[(dayIndex - 1) % DAY_COLORS.length],
+          activities: [],
+        };
+        days.push(currentDay);
+        continue;
+      }
+
+      const timeMatch = line.match(/^(\d{1,2}[:.]\d{2})\s*[|—\-–]?\s*(.+)/);
+      if (timeMatch && currentDay) {
+        const time = timeMatch[1].replace('.', ':');
+        const desc = timeMatch[2].trim();
+        const bizMatch = desc.match(/^(?:деловая[яе]?|сессия)[:\-–\s]+(.+)/i);
+        if (bizMatch) {
+          const title = bizMatch[1].trim();
+          business.push({ id: `b${business.length + 1}`, time, day: currentDay.label, duration: '', track: null, title, speakers: [], room: '', desc: '' });
+          currentDay.activities.push({ time, title, location: '', type: 'business', note: null });
+        } else {
+          const low = desc.toLowerCase();
+          let type = 'key';
+          if (/завтрак|обед|ужин|банкет/.test(low))         type = 'meal';
+          else if (/гала|gala/.test(low))                    type = 'gala';
+          else if (/трансфер|автобус|вылет|прилёт|аэропорт/.test(low)) type = 'transfer';
+          else if (/экскурс/.test(low))                      type = 'excursion';
+          else if (/отель|check.in|заселен|заезд|выселен/.test(low))   type = 'hotel';
+          currentDay.activities.push({ time, title: desc, location: '', type, note: null });
+        }
+      }
     }
+    return { days, business };
   }
 
-  async function parseWithAI() {}
+  function parseProgram() {
+    const text   = document.getElementById('ai-program-text').value.trim();
+    const status = document.getElementById('ai-status');
+    if (!text) { showToast('Вставьте текст программы'); return; }
+
+    const parsed = parseImportText(text);
+    if (!parsed.days.length) {
+      status.textContent = '❌ Дни не найдены. Используйте формат: «День 1 | 18 ноября»';
+      return;
+    }
+
+    aiResult = { days: parsed.days, business: parsed.business };
+    status.textContent = '';
+    showAIPreview(aiResult);
+  }
 
   function showAIPreview(result) {
     const daysCount  = (result.days || []).length;
@@ -1475,8 +1493,8 @@ ${text}`;
     selectGradient,
     selectCardStyle,
     selectMotion,
-    // ai import
-    saveApiKey, parseWithAI, applyAIResult, discardAIResult,
+    // import
+    copyTemplate, parseProgram, applyAIResult, discardAIResult,
     // brand kits
     saveBrandKit, applyBrandKit, deleteBrandKit,
     // emoji
