@@ -1,0 +1,18 @@
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Editors
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Temp
+*.tmp
+*.log
