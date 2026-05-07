@@ -649,6 +649,25 @@ textarea { resize: vertical; }
 }
 
 /* ===== IMPORT ===== */
+.file-upload-zone {
+  display: block;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 16px;
+  background: var(--surface);
+}
+.file-upload-zone:hover, .file-upload-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.file-upload-icon { font-size: 28px; margin-bottom: 8px; }
+.file-upload-text { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.file-upload-hint { font-size: 12px; color: var(--text-2); }
+
 .import-template-box {
   background: #F8FAFC;
   border: 1px solid var(--border);

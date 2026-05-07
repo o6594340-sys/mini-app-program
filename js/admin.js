@@ -1329,6 +1329,75 @@ const Admin = (() => {
     showAIPreview(aiResult);
   }
 
+  function handleFileDrop(e) {
+    e.preventDefault();
+    document.getElementById('file-upload-zone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+
+  function handleFileUpload(input) {
+    const file = input.files[0];
+    if (file) processFile(file);
+    input.value = '';
+  }
+
+  function processFile(file) {
+    const status = document.getElementById('ai-status');
+    const ext = file.name.split('.').pop().toLowerCase();
+    status.textContent = '⏳ Читаю файл…';
+    document.getElementById('ai-result').classList.add('hidden');
+
+    if (ext === 'txt') {
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('ai-program-text').value = e.target.result;
+        status.textContent = '';
+        parseProgram();
+      };
+      reader.readAsText(file, 'UTF-8');
+
+    } else if (ext === 'docx') {
+      if (typeof mammoth === 'undefined') { status.textContent = '❌ Библиотека не загружена, проверьте интернет'; return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        mammoth.extractRawText({ arrayBuffer: e.target.result })
+          .then(result => {
+            document.getElementById('ai-program-text').value = result.value;
+            status.textContent = '';
+            parseProgram();
+          })
+          .catch(err => { status.textContent = '❌ Ошибка Word: ' + err.message; });
+      };
+      reader.readAsArrayBuffer(file);
+
+    } else if (ext === 'pdf') {
+      if (typeof pdfjsLib === 'undefined') { status.textContent = '❌ Библиотека не загружена, проверьте интернет'; return; }
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const reader = new FileReader();
+      reader.onload = async e => {
+        try {
+          const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
+          let text = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(item => item.str).join(' ') + '\n';
+          }
+          document.getElementById('ai-program-text').value = text;
+          status.textContent = '';
+          parseProgram();
+        } catch (err) {
+          status.textContent = '❌ Ошибка PDF: ' + err.message;
+        }
+      };
+      reader.readAsArrayBuffer(file);
+
+    } else {
+      status.textContent = '❌ Формат не поддерживается. Используйте .docx, .pdf или .txt';
+    }
+  }
+
   function showAIPreview(result) {
     const daysCount  = (result.days || []).length;
     const actsCount  = (result.days || []).reduce((n, d) => n + (d.activities || []).length, 0);
@@ -1494,7 +1563,7 @@ const Admin = (() => {
     selectCardStyle,
     selectMotion,
     // import
-    copyTemplate, parseProgram, applyAIResult, discardAIResult,
+    copyTemplate, parseProgram, handleFileUpload, handleFileDrop, applyAIResult, discardAIResult,
     // brand kits
     saveBrandKit, applyBrandKit, deleteBrandKit,
     // emoji

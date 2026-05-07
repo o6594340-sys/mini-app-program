@@ -88,15 +88,26 @@
 15:00 | Экскурсия по городу</pre>
       </div>
 
+      <label class="file-upload-zone" id="file-upload-zone"
+             ondragover="event.preventDefault();this.classList.add('drag-over')"
+             ondragleave="this.classList.remove('drag-over')"
+             ondrop="Admin.handleFileDrop(event)">
+        <input type="file" accept=".docx,.pdf,.txt" class="hidden"
+               onchange="Admin.handleFileUpload(this)">
+        <div class="file-upload-icon">📄</div>
+        <div class="file-upload-text">Загрузить файл Word, PDF или TXT</div>
+        <div class="file-upload-hint">Перетащите сюда или нажмите для выбора · .docx · .pdf · .txt</div>
+      </label>
+
       <div class="import-hint-box">
         <span>💡</span>
-        <span>Поддерживаются разделители <strong>|</strong> и <strong>—</strong>. Деловые сессии начинаются с <strong>Деловая:</strong></span>
+        <span>Деловые сессии начинаются с <strong>Деловая:</strong> — или просто вставьте любой текст, приложение разберёт автоматически.</span>
       </div>
 
       <div class="form-group">
-        <label>Текст программы</label>
-        <textarea id="ai-program-text" rows="12"
-          placeholder="Вставьте или наберите программу по шаблону..."></textarea>
+        <label>Текст программы (или отредактируйте после загрузки файла)</label>
+        <textarea id="ai-program-text" rows="10"
+          placeholder="Текст появится здесь после загрузки файла, или вставьте вручную..."></textarea>
       </div>
 
       <div class="ai-parse-row">
@@ -602,6 +613,8 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/templates.js"></script>
 <script src="js/admin.js"></script>
