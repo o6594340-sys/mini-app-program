@@ -9,7 +9,7 @@ const EVENT = {
   location: 'Стамбул, Турция',
   brand: {
     color:     '#C8102E',
-    logo:      '',
+    logo:      'TN logo.jpg',
     logoEmoji: '🕌',
   },
   hotel: {
