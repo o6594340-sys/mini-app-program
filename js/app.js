@@ -644,36 +644,6 @@ const App = (() => {
     html += `<div class="section-title" style="margin-top:24px">Стоит попробовать</div>`;
     others.forEach(c => html += cuisineCard(c));
 
-    html += `<div class="section-title" style="margin-top:24px">Этикет за столом</div>`;
-    html += `<div class="card"><div class="card-body">`;
-    ETIQUETTE.forEach(e => {
-      html += `
-        <div class="etiquette-row">
-          <span class="etiquette-icon">${e.icon}</span>
-          <div>
-            <div class="etiquette-title">${e.title}</div>
-            <div class="etiquette-text">${e.text}</div>
-          </div>
-        </div>
-      `;
-    });
-    html += `</div></div>`;
-
-    html += `<div class="section-title" style="margin-top:24px">Практические советы</div>`;
-    html += `<div class="card"><div class="card-body">`;
-    PRACTICAL.forEach(p => {
-      html += `
-        <div class="etiquette-row">
-          <span class="etiquette-icon">${p.icon}</span>
-          <div>
-            <div class="etiquette-title">${p.title}</div>
-            <div class="etiquette-text">${p.text}</div>
-          </div>
-        </div>
-      `;
-    });
-    html += `</div></div>`;
-
     html += `</div>`;
     container.innerHTML = html;
   }
