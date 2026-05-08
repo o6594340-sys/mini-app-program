@@ -204,8 +204,9 @@ const App = (() => {
     state.tab = tab;
 
     const renderers = {
-      program: renderProgram, hotel: renderHotel, sights: renderSights,
-      cuisine: renderCuisine, history: renderHistory, contacts: renderContacts,
+      program: renderProgram, transfers: renderTransfers, hotel: renderHotel,
+      sights: renderSights, cuisine: renderCuisine, history: renderHistory,
+      contacts: renderContacts,
     };
     if (renderers[tab]) renderers[tab]();
   }
@@ -405,6 +406,47 @@ const App = (() => {
           </div>
         </div>
       `;
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
+  }
+
+  /* ─── TRANSFERS ─────────────────────── */
+  function renderTransfers() {
+    const container = document.getElementById('tab-transfers');
+    const data = adminData('transfers', TRANSFERS);
+    let html = `<div class="section-pad">`;
+
+    data.forEach(day => {
+      html += `
+        <div class="transfers-day-header">
+          <span class="transfers-day-dot" style="background:${day.color}"></span>
+          <span class="transfers-day-label" style="color:${day.color}">${day.day}</span>
+          <span class="transfers-day-date">${day.date}</span>
+        </div>
+      `;
+      day.routes.forEach(r => {
+        html += `
+          <div class="transfer-card">
+            <div class="transfer-time">${r.time}</div>
+            <div class="transfer-body">
+              <div class="transfer-title">${r.title}</div>
+              <div class="transfer-route">
+                <div class="transfer-point"><span class="tr-dot tr-dot-from"></span>${r.from}</div>
+                <div class="transfer-line"></div>
+                <div class="transfer-point"><span class="tr-dot tr-dot-to" style="background:${day.color}"></span>${r.to}</div>
+              </div>
+              <div class="transfer-meta">
+                <span>${r.vehicle}</span>
+                <span>⏱ ${r.duration}</span>
+              </div>
+              <div class="transfer-meet">🕐 Сбор: ${r.meet}</div>
+              ${r.note ? `<div class="transfer-note">⚠️ ${r.note}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
     });
 
     html += `</div>`;
