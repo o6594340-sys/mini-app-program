@@ -1,4 +1,4 @@
-const CACHE = 'mice-v14';
+const CACHE = 'mice-v15';
 const OFFLINE = [
   '/',
   '/index.html',
@@ -23,6 +23,8 @@ const OFFLINE = [
   '/photos/liman.jpg',
   '/photos/park-fora.jpg',
   '/photos/istiklal.jpg',
+  '/photos/moxy-lobby.jpg',
+  '/photos/moxy-interior.jpg',
 ];
 
 self.addEventListener('install', e => {

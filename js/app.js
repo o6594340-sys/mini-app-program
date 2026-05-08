@@ -473,8 +473,12 @@ const App = (() => {
       <div class="hotel-tip-row">💡 ${t}</div>
     `).join('');
 
+    const galleryHtml = (h.gallery && h.gallery.length > 1)
+      ? `<div class="hotel-gallery">${h.gallery.map(src => `<img class="hotel-gallery-img" src="${src}" alt="${h.name}">`).join('')}</div>`
+      : `<img class="hotel-photo" src="${h.image}" alt="${h.name}">`;
+
     container.innerHTML = `
-      <img class="hotel-photo" src="${h.image}" alt="${h.name}">
+      ${galleryHtml}
       <div class="section-pad">
 
         <div class="hotel-name-block">

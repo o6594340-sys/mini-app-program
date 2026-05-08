@@ -701,6 +701,16 @@ body {
   width: 100%; height: 220px;
   object-fit: cover; display: block;
 }
+.hotel-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  width: 100%;
+}
+.hotel-gallery-img {
+  width: 100%; height: 210px;
+  object-fit: cover; display: block;
+}
 .hotel-name-block {
   margin-bottom: 16px;
 }
