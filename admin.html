@@ -171,6 +171,14 @@
         </div>
       </div>
       <div id="backup-status"></div>
+      <div class="backup-grid" style="margin-top:12px">
+        <div class="backup-card" style="border:1.5px solid #e53935;background:#fff5f5">
+          <div class="backup-icon">🗑️</div>
+          <div class="backup-title">Сбросить к данным по умолчанию</div>
+          <div class="backup-desc">Удалит все сохранённые данные из браузера. Приложение вернётся к содержимому из <code>data.js</code>. Брендинг и оформление сохранятся.</div>
+          <button class="btn-danger" onclick="Admin.resetToDefaults()">Сбросить данные</button>
+        </div>
+      </div>
     </section>
 
     <!-- ШАБЛОНЫ -->

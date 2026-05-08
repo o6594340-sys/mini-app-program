@@ -1512,6 +1512,15 @@ const Admin = (() => {
     reader.readAsText(file);
   }
 
+  function resetToDefaults() {
+    if (!confirm('Сбросить все данные приложения к содержимому data.js?\n\nОформление (шрифты, цвета, стили карточек) сохранится.\nПрограмма, отель, места, кухня, история и контакты вернутся к дефолтным.')) return;
+    const dataKeys = [KEYS.event, KEYS.days, KEYS.restaurants, KEYS.business, KEYS.hotel, KEYS.sights, KEYS.cuisine, KEYS.history, 'admin_contacts', 'admin_transfers', 'admin_faq', 'admin_practical'];
+    dataKeys.forEach(k => localStorage.removeItem(k));
+    showToast('Данные сброшены к данным по умолчанию');
+    const status = document.getElementById('backup-status');
+    if (status) status.innerHTML = `<div class="backup-success">✓ Данные сброшены. Откройте приложение — там будут актуальные данные из data.js</div>`;
+  }
+
   /* ─── MODAL / TOAST ───────────────────── */
   function openModal(id) {
     document.getElementById(id).classList.remove('hidden');
@@ -1540,7 +1549,7 @@ const Admin = (() => {
   return {
     login, logout, showSection, applyTemplate,
     // backup
-    exportData, importData,
+    exportData, importData, resetToDefaults,
     // program
     selectProgramDay, openActivityModal, saveActivity, deleteActivity,
     // business
