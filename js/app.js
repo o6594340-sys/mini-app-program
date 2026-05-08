@@ -594,6 +594,9 @@ const App = (() => {
   }
 
   function restaurantCard(r) {
+    const menuHtml = r.menu && r.menu.length
+      ? `<div class="rest-menu"><div class="rest-menu-title">Наше меню</div><ul class="rest-menu-list">${r.menu.map(i => `<li>${i}</li>`).join('')}</ul></div>`
+      : '';
     return `
       <div class="rest-card">
         <img class="rest-img" src="${r.image}" alt="${r.title}">
@@ -606,6 +609,7 @@ const App = (() => {
             <span class="rest-price">${r.price}</span>
           </div>
           <p class="rest-desc">${r.desc}</p>
+          ${menuHtml}
           <div class="rest-meta">
             <span>🕐 ${r.hours}</span>
             <span>🚇 ${r.metro}</span>
@@ -624,7 +628,13 @@ const App = (() => {
 
     let html = `<div class="section-pad">`;
 
-    html += `<div class="section-title">Обязательно попробуйте</div>`;
+    const programRests = getRestaurants().filter(r => r.type === 'program');
+    if (programRests.length) {
+      html += `<div class="section-title">Рестораны по программе</div>`;
+      programRests.forEach(r => html += restaurantCard(r));
+    }
+
+    html += `<div class="section-title" style="margin-top:24px">Обязательно попробуйте</div>`;
     must.forEach(c => html += cuisineCard(c));
 
     html += `<div class="section-title" style="margin-top:24px">Стоит попробовать</div>`;
