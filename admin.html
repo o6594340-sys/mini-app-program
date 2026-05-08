@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Панель администратора — Форум Пекин 2024</title>
+  <title>Панель администратора</title>
   <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
@@ -11,9 +11,9 @@
 <!-- ═══ AUTH ══════════════════════════════ -->
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="auth-logo">🏯</div>
+    <div class="auth-logo">🕌</div>
     <h1 class="auth-title">Панель организатора</h1>
-    <p class="auth-sub">Деловой форум Пекин 2024</p>
+    <p class="auth-sub">Стамбул 2026</p>
     <input type="password" id="auth-input" class="auth-input"
       placeholder="Пароль администратора"
       onkeydown="if(event.key==='Enter')Admin.login()">
@@ -27,7 +27,7 @@
 <div id="admin-panel" class="hidden">
 
   <aside class="sidebar">
-    <div class="sidebar-logo">🏯 Организатор</div>
+    <div class="sidebar-logo">🕌 Организатор</div>
     <nav class="sidebar-nav">
       <div class="nav-group-label">AI</div>
       <button class="nav-btn" onclick="Admin.showSection('ai-import', this)">📥 Импорт программы</button>
@@ -35,7 +35,8 @@
       <div class="nav-group-label">Направление</div>
       <button class="nav-btn" onclick="Admin.showSection('templates', this)">🌍 Шаблон страны</button>
 
-      <div class="nav-group-label">Данные</div>
+      <div class="nav-group-label">Проекты</div>
+      <button class="nav-btn" onclick="Admin.showSection('new-project', this)">🗂 Новый проект</button>
       <button class="nav-btn" onclick="Admin.showSection('backup', this)">💾 Бэкап</button>
 
       <div class="nav-group-label">Коммуникации</div>
@@ -177,6 +178,42 @@
           <div class="backup-title">Сбросить к данным по умолчанию</div>
           <div class="backup-desc">Удалит все сохранённые данные из браузера. Приложение вернётся к содержимому из <code>data.js</code>. Брендинг и оформление сохранятся.</div>
           <button class="btn-danger" onclick="Admin.resetToDefaults()">Сбросить данные</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- НОВЫЙ ПРОЕКТ -->
+    <section id="section-new-project" class="admin-section hidden">
+      <div class="section-header">
+        <h2>🗂 Новый проект</h2>
+        <p>Каждое мероприятие — отдельное приложение со своей ссылкой. Проекты существуют параллельно и не влияют друг на друга.</p>
+      </div>
+
+      <div class="backup-grid">
+        <div class="backup-card">
+          <div class="backup-icon">📄</div>
+          <div class="backup-title">Скачать шаблон</div>
+          <div class="backup-desc">Скачает чистый <code>data.js</code> с пустыми полями. Вставьте в новый репозиторий — и заполните данными нового мероприятия.</div>
+          <button class="btn-primary" onclick="Admin.downloadTemplate()">Скачать data.js</button>
+        </div>
+        <div class="backup-card">
+          <div class="backup-icon">🐙</div>
+          <div class="backup-title">Скопировать репозиторий</div>
+          <div class="backup-desc">Откроет GitHub — нажмите «Use this template» → введите название нового проекта → включите Pages. Готово.</div>
+          <a class="btn-primary" href="https://github.com/o6594340-sys/mini-app-program/generate" target="_blank" style="display:block;text-align:center;text-decoration:none">Открыть на GitHub →</a>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-body">
+          <div class="backup-title" style="margin-bottom:12px">📋 Как создать новый проект за 5 шагов</div>
+          <div class="new-project-steps">
+            <div class="np-step"><span class="np-num">1</span><div><strong>Скопируй репозиторий</strong> — кнопка «Открыть на GitHub» → «Use this template» → назови, например <code>mini-app-dubai</code></div></div>
+            <div class="np-step"><span class="np-num">2</span><div><strong>Включи GitHub Pages</strong> — Settings → Pages → Source: main → Save</div></div>
+            <div class="np-step"><span class="np-num">3</span><div><strong>Скачай шаблон data.js</strong> — заполни данными нового мероприятия</div></div>
+            <div class="np-step"><span class="np-num">4</span><div><strong>Загрузи data.js</strong> в новый репозиторий (заменив старый)</div></div>
+            <div class="np-step"><span class="np-num">5</span><div><strong>Готово!</strong> Новый сайт: <code>https://o6594340-sys.github.io/mini-app-dubai/</code></div></div>
+          </div>
         </div>
       </div>
     </section>

@@ -748,3 +748,15 @@ textarea { resize: vertical; }
   display: flex; gap: 10px;
   margin-top: 16px;
 }
+
+/* ── NEW PROJECT ── */
+.new-project-steps { display: flex; flex-direction: column; gap: 12px; }
+.np-step { display: flex; gap: 12px; align-items: flex-start; }
+.np-num {
+  flex-shrink: 0; width: 26px; height: 26px;
+  background: var(--accent); color: #fff;
+  border-radius: 50%; font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.np-step div { font-size: 13px; color: var(--text-2); line-height: 1.55; padding-top: 3px; }
+.np-step strong { color: var(--text); }

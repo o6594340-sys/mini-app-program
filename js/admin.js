@@ -1512,6 +1512,175 @@ const Admin = (() => {
     reader.readAsText(file);
   }
 
+  function downloadTemplate() {
+    const tpl = `// ═══════════════════════════════════════════
+// Новое мероприятие — данные
+// Заполните все поля и загрузите файл в репозиторий
+// ═══════════════════════════════════════════
+
+const EVENT = {
+  title:    'Название события',
+  subtitle: 'Компания · XX участников',
+  dates:    'ДД–ДД месяца ГГГГ',
+  location: 'Город, Страна',
+  brand: {
+    color:     '#C8102E',
+    logo:      '',
+    logoEmoji: '🏢',
+  },
+  hotel: {
+    name:     'Название отеля ★★★★',
+    address:  'Адрес отеля',
+    phone:    '+X XXX XXX XX XX',
+    maps:     '',
+    checkin:  '15:00',
+    checkout: '12:00',
+  },
+  wifi:      { network: '', password: '' },
+  organizer: { name: 'Имя', telegram: '' },
+  emergency: '112',
+};
+
+const TODAY_INDEX = 0;
+
+const HOTEL = {
+  name:      'Название отеля',
+  nameCn:    'Краткое описание расположения',
+  stars:     4,
+  image:     '',
+  gallery:   [],
+  address:   'Адрес',
+  addressCn: 'Адрес (доп.)',
+  metro:     'Как добраться',
+  phone:     '+X XXX XXX XX XX',
+  checkin:   '15:00',
+  checkout:  '12:00',
+  breakfast: 'Описание завтрака',
+  desc:      'Описание отеля.',
+  amenities: [
+    { icon: '🍳', title: 'Завтрак',    note: 'Время · включён/не включён' },
+    { icon: '📶', title: 'Wi-Fi',      note: 'Бесплатный' },
+    { icon: '🧳', title: 'Багаж',      note: 'Хранение на ресепшн' },
+  ],
+  tips: [
+    'Совет 1.',
+    'Совет 2.',
+  ],
+};
+
+const DAYS = [
+  {
+    day: 'День 1', date: 'ДД месяца, день недели',
+    color: '#2196F3',
+    items: [
+      { time: '00:00', type: 'transfer', title: 'Трансфер', note: '' },
+      { time: '00:00', type: 'meal',     title: 'Завтрак',  note: '' },
+      { time: '00:00', type: 'excursion',title: 'Экскурсия', note: '' },
+      { time: '00:00', type: 'meal',     title: 'Обед',     note: '' },
+      { time: '00:00', type: 'meal',     title: 'Ужин',     note: '' },
+    ],
+  },
+];
+
+const BUSINESS_SESSIONS = [];
+
+const TRANSFERS = [
+  {
+    day: 'День 1', date: 'ДД месяца', color: '#2196F3',
+    routes: [
+      {
+        time: '00:00', title: 'Название трансфера',
+        from: 'Откуда', to: 'Куда',
+        vehicle: 'Автобус', duration: '30 мин',
+        meet: '00:00 у выхода',
+        note: '',
+      },
+    ],
+  },
+];
+
+const SIGHTS = [
+  {
+    id: 's1',
+    title: 'Название места',
+    sub: 'Подзаголовок · год',
+    emoji: '🏛',
+    image: '',
+    distance: 'Расстояние от отеля',
+    hours: '09:00–18:00',
+    price: 'Цена / Бесплатно',
+    tags: ['Тег'],
+    desc: 'Описание места.',
+    tip: 'Совет посетителям.',
+  },
+];
+
+const RESTAURANTS = [
+  {
+    id: 'r1', type: 'program',
+    title: 'Название ресторана',
+    cuisine: 'Тип кухни',
+    emoji: '🍽',
+    price: '₺₺₺',
+    address: 'Адрес',
+    metro: 'Как добраться',
+    hours: '12:00–23:00',
+    note: 'Включено — Ужин · День 1',
+    image: '',
+    desc: 'Описание.',
+    menu: ['Блюдо 1', 'Блюдо 2', 'Десерт'],
+  },
+];
+
+const CUISINE = [
+  {
+    id: 'c1', must: true,
+    title: 'Блюдо',
+    cn: 'Транслитерация — описание',
+    emoji: '🥩',
+    price: 'Примерная цена',
+    desc: 'Описание блюда.',
+    where: 'Где попробовать',
+  },
+];
+
+const ETIQUETTE = [];
+const PRACTICAL = [];
+
+const FAQ = [
+  { q: 'Вопрос?', a: 'Ответ.' },
+];
+
+const HISTORY = [
+  {
+    section: 'Раздел',
+    emoji: '📜',
+    facts: [
+      { title: 'Факт', text: 'Текст.', wow: false },
+    ],
+  },
+];
+
+const NEARBY = [];
+
+const CONTACTS = [
+  {
+    group: 'Организаторы',
+    people: [
+      { name: 'Имя Фамилия', role: 'Организатор', phone: '+X XXX XXX-XX-XX', messengers: ['WhatsApp', 'Telegram'] },
+    ],
+  },
+];
+`;
+    const blob = new Blob([tpl], { type: 'text/javascript;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'data.js';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Шаблон data.js скачан');
+  }
+
   function resetToDefaults() {
     if (!confirm('Сбросить все данные приложения к содержимому data.js?\n\nОформление (шрифты, цвета, стили карточек) сохранится.\nПрограмма, отель, места, кухня, история и контакты вернутся к дефолтным.')) return;
     const dataKeys = [KEYS.event, KEYS.days, KEYS.restaurants, KEYS.business, KEYS.hotel, KEYS.sights, KEYS.cuisine, KEYS.history, 'admin_contacts', 'admin_transfers', 'admin_faq', 'admin_practical'];
@@ -1549,7 +1718,7 @@ const Admin = (() => {
   return {
     login, logout, showSection, applyTemplate,
     // backup
-    exportData, importData, resetToDefaults,
+    exportData, importData, resetToDefaults, downloadTemplate,
     // program
     selectProgramDay, openActivityModal, saveActivity, deleteActivity,
     // business
