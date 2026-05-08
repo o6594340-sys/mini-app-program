@@ -542,6 +542,14 @@ body {
 .etiquette-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
 .etiquette-text  { font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
 
+/* ===== MEMO TAB ===== */
+.memo-section { margin-bottom: 8px; }
+.memo-row { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.memo-row:last-child { border-bottom: none; }
+.memo-icon  { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; margin-top: 2px; }
+.memo-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.memo-text  { font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
+
 /* ===== MODAL / FAQ ===== */
 .modal-overlay {
   position: fixed; inset: 0;

@@ -206,7 +206,7 @@ const App = (() => {
     const renderers = {
       program: renderProgram, transfers: renderTransfers, hotel: renderHotel,
       sights: renderSights, cuisine: renderCuisine, history: renderHistory,
-      contacts: renderContacts,
+      memo: renderMemo, contacts: renderContacts,
     };
     if (renderers[tab]) renderers[tab]();
   }
@@ -722,6 +722,69 @@ const App = (() => {
     container.innerHTML = html;
   }
 
+  /* ─── MEMO ──────────────────────────────*/
+  function renderMemo() {
+    const container = document.getElementById('tab-memo');
+    const sections = [
+      {
+        title: 'Деньги и связь',
+        emoji: '💳',
+        items: [
+          { icon: '💴', title: 'Карты', text: 'Российские банковские карты в Турции <strong>НЕ РАБОТАЮТ</strong>. Берите наличные рубли/доллары/евро для обмена. Обменники (döviz bürosu) — лучший курс. В аэропорту курс хуже. Рекомендуем 2000–3000 TRY на свободное время.' },
+          { icon: '🔌', title: 'Розетки', text: '220V, тип C/F — как в России. Адаптер не нужен.' },
+          { icon: '🌐', title: 'Интернет', text: 'Никаких блокировок — все сервисы работают. SIM в аэропорту: Turkcell или Vodafone (~400 TRY за 10 ГБ). Роуминг российских операторов работает, но дорого.' },
+          { icon: '⏰', title: 'Часовой пояс', text: 'UTC+3 = Московское время. Разницы нет — звонить домой без пересчёта.' },
+        ],
+      },
+      {
+        title: 'Правила и обычаи',
+        emoji: '🕌',
+        items: [
+          { icon: '🕌', title: 'Правила в мечетях', text: 'Женщинам: платок на голову, закрыть плечи и колени. Мужчинам: не шорты. Все снимают обувь. Платки выдаются бесплатно у входа. Не фотографируйте молящихся, не шумите.' },
+          { icon: '📸', title: 'Фото', text: 'Перед съёмкой местных жителей (особенно женщин) — спросите разрешения. В мечетях фото разрешены, но вспышку выключить. Военные объекты и полицейских не снимать.' },
+          { icon: '🚫', title: 'Алкоголь и улица', text: 'Пить алкоголь на улице и набережных нежелательно. В ресторанах, барах и на территории отеля — без ограничений.' },
+          { icon: '💰', title: 'Торг на рынках', text: 'На рынках и в сувенирных лавках торг — норма. Начальная цена завышена в 2–3 раза. Торгуйтесь спокойно с улыбкой. В магазинах с ценниками цены фиксированные.' },
+        ],
+      },
+      {
+        title: 'Здоровье и транспорт',
+        emoji: '🚕',
+        items: [
+          { icon: '💧', title: 'Вода', text: 'Воду из-под крана не пить. Бутилированная: 10–15 TRY за 0,5 л в магазине. В отеле — обратитесь на ресепшн.' },
+          { icon: '🚌', title: 'Транспорт', text: 'Такси: приложение BiTaksi или жёлтые официальные такси со счётчиком. Трамвай T1 и T2, паром между берегами. По Бейоглу и Таксиму приятно ходить пешком.' },
+          { icon: '🍵', title: 'Турецкий чай', text: 'Отказываться от чая невежливо. Стакан держат за ободок (горячо). Ложечка поперёк стакана = «достаточно, спасибо».' },
+        ],
+      },
+      {
+        title: 'Важно: праздник',
+        emoji: '⚠️',
+        items: [
+          { icon: '🌙', title: 'Ураза-Байрам 27–28 мая', text: '27 и 28 мая — Ид аль-Фитр (Ураза-Байрам). ЗАКРЫТЫ: Гранд-базар, Пряный базар, банки, госучреждения. Рестораны и туристические объекты работают. Наша программа скорректирована.' },
+          { icon: '🛍', title: 'Шопинг', text: 'Планируйте покупки на 26 мая — свободное время после 17:00. Гранд-базар и Пряный базар 27–28 мая закрыты.' },
+        ],
+      },
+    ];
+
+    let html = `<div class="section-pad">`;
+    sections.forEach(s => {
+      html += `<div class="memo-section">
+        <div class="section-title">${s.emoji} ${s.title}</div>
+        <div class="card"><div class="card-body">`;
+      s.items.forEach(item => {
+        html += `<div class="memo-row">
+          <span class="memo-icon">${item.icon}</span>
+          <div>
+            <div class="memo-title">${item.title}</div>
+            <div class="memo-text">${item.text}</div>
+          </div>
+        </div>`;
+      });
+      html += `</div></div></div>`;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+  }
+
   /* ─── CONTACTS ──────────────────────────*/
   function renderContacts() {
     const container = document.getElementById('tab-contacts');
@@ -797,7 +860,7 @@ const App = (() => {
     selectProgramDay,
     copyWifi,
     openFAQ, closeFAQ, searchFAQ, toggleFAQ,
-    renderContacts,
+    renderMemo, renderContacts,
   };
 
 })();
