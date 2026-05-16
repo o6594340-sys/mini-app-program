@@ -360,21 +360,20 @@ const Admin = (() => {
 
   function applyBgPreview(i) {
     const p = BG_PRESETS[i];
-    const strip = document.getElementById('bg-preview-strip');
-    if (!p || !strip) return;
-    strip.style.background = '';
-    strip.style.backgroundImage = '';
-    strip.style.backgroundSize = '';
-    strip.style.backgroundColor = '';
+    if (!p) return;
+    const main = document.querySelector('.admin-main');
+    if (!main) return;
+    main.style.background = '';
+    main.style.backgroundImage = '';
+    main.style.backgroundSize = '';
+    main.style.backgroundColor = '';
     if (p.bg) {
-      strip.style.background = p.bg;
+      main.style.background = p.bg;
     } else {
-      strip.style.backgroundColor = p.bgColor || '#fff';
-      if (p.bgImage) strip.style.backgroundImage = p.bgImage;
-      if (p.bgSize)  strip.style.backgroundSize  = p.bgSize;
+      if (p.bgColor) main.style.backgroundColor = p.bgColor;
+      if (p.bgImage) main.style.backgroundImage = p.bgImage;
+      if (p.bgSize)  main.style.backgroundSize  = p.bgSize;
     }
-    const label = strip.querySelector('.bg-preview-label');
-    if (label) label.style.color = p.dark ? 'rgba(255,255,255,0.75)' : '#999';
   }
 
   function selectBg(i) {

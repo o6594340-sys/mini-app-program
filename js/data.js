@@ -892,4 +892,10 @@ const BG_PRESETS = [
   { id: 'emerald',   label: 'Изумруд',  dark: true, bg: 'linear-gradient(135deg,#022c22 0%,#064e3b 100%)' },
   { id: 'malachite', label: 'Малахит',  dark: true, bg: 'linear-gradient(135deg,#0f2b1f 0%,#1a4332 100%)' },
   { id: 'amethyst',  label: 'Аметист',  dark: true, bg: 'linear-gradient(135deg,#1a0533 0%,#2d0a5e 100%)' },
+  // — тёмные с текстурой —
+  { id: 'night_grid',    label: 'Ночь · сетка',    dark: true, bgImage: 'linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(135deg,#0a0f1e 0%,#111827 100%)', bgSize: '26px 26px,26px 26px,auto' },
+  { id: 'emerald_dots',  label: 'Изумруд · точки', dark: true, bgImage: 'radial-gradient(circle,rgba(255,255,255,0.08) 1px,transparent 1px),linear-gradient(135deg,#022c22 0%,#064e3b 100%)', bgSize: '18px 18px,auto' },
+  { id: 'navy_stripes',  label: 'Флот · полосы',   dark: true, bgImage: 'repeating-linear-gradient(135deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 1px,transparent 1px,transparent 16px),linear-gradient(135deg,#0a1628 0%,#1e3a5f 100%)', bgSize: 'auto,auto' },
+  { id: 'graphite_mesh', label: 'Графит · решётка',dark: true, bgImage: 'linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(135deg,#1c1c1e 0%,#2d2d30 100%)', bgSize: '12px 12px,12px 12px,auto' },
+  { id: 'amethyst_lines',label: 'Аметист · линии', dark: true, bgImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 14px),linear-gradient(135deg,#1a0533 0%,#2d0a5e 100%)', bgSize: 'auto,auto' },
 ];
