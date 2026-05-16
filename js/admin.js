@@ -348,19 +348,18 @@ const Admin = (() => {
 
   function applyBgPreview(i) {
     const p = BG_PRESETS[i];
-    if (!p) return;
-    const b = document.querySelector('.admin-main');
-    if (!b) return;
-    b.style.background = '';
-    b.style.backgroundImage = '';
-    b.style.backgroundSize = '';
-    b.style.backgroundColor = '';
+    const strip = document.getElementById('bg-preview-strip');
+    if (!p || !strip) return;
+    strip.style.background = '';
+    strip.style.backgroundImage = '';
+    strip.style.backgroundSize = '';
+    strip.style.backgroundColor = '';
     if (p.bg) {
-      b.style.background = p.bg;
+      strip.style.background = p.bg;
     } else {
-      if (p.bgColor) b.style.backgroundColor = p.bgColor;
-      if (p.bgImage) b.style.backgroundImage = p.bgImage;
-      if (p.bgSize)  b.style.backgroundSize  = p.bgSize;
+      strip.style.backgroundColor = p.bgColor || '#fff';
+      if (p.bgImage) strip.style.backgroundImage = p.bgImage;
+      if (p.bgSize)  strip.style.backgroundSize  = p.bgSize;
     }
   }
 
