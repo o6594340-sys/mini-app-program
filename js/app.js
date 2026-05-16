@@ -40,12 +40,17 @@ const App = (() => {
   function applyBranding() {
     const ev    = getEvent();
     const brand = ev.brand || {};
-    const color = brand.color || '#C9353F';
+    const color  = brand.color  || '#C9353F';
+    const color2 = brand.color2 || '#1A6B8A';
 
-    // accent colour cascade
+    // primary accent cascade
     document.documentElement.style.setProperty('--accent', color);
     document.documentElement.style.setProperty('--accent-dark', shadeColor(color, -15));
     document.documentElement.style.setProperty('--accent-light', hexToRgba(color, 0.08));
+
+    // secondary accent cascade
+    document.documentElement.style.setProperty('--accent2', color2);
+    document.documentElement.style.setProperty('--accent2-light', hexToRgba(color2, 0.09));
 
     // header title + sub
     const titleEl = document.getElementById('header-title');

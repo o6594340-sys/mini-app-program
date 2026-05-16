@@ -307,11 +307,14 @@ const Admin = (() => {
   function loadSettingsForm() {
     const e     = state.event;
     const brand = e.brand || {};
-    const color = brand.color || '#C9353F';
+    const color  = brand.color  || '#C9353F';
+    const color2 = brand.color2 || '#1A6B8A';
 
-    document.getElementById('s-brand-color').value     = color;
-    document.getElementById('s-brand-color-hex').value = color;
-    document.getElementById('s-brand-logo').value      = brand.logo || '';
+    document.getElementById('s-brand-color').value      = color;
+    document.getElementById('s-brand-color-hex').value  = color;
+    document.getElementById('s-brand-color2').value     = color2;
+    document.getElementById('s-brand-color2-hex').value = color2;
+    document.getElementById('s-brand-logo').value       = brand.logo || '';
     document.getElementById('s-title').value           = e.title             || '';
     document.getElementById('s-dates').value           = e.dates             || '';
     document.getElementById('s-location').value        = e.location          || '';
@@ -504,6 +507,7 @@ const Admin = (() => {
 
   function updateBrandPreview() {
     const color    = document.getElementById('s-brand-color').value;
+    const color2   = document.getElementById('s-brand-color2').value;
     const logo     = document.getElementById('s-brand-logo').value.trim();
     const title    = document.getElementById('s-title').value    || 'Название события';
     const dates    = document.getElementById('s-dates').value    || '';
@@ -512,17 +516,21 @@ const Admin = (() => {
     const titleEl  = document.getElementById('brand-preview-title');
     const subEl    = document.getElementById('brand-preview-sub');
     const logoEl   = document.getElementById('brand-preview-logo');
-    const gradKey = localStorage.getItem(KEYS.gradient) || 'glow';
-    if (bar)     bar.style.background = gradientForRecipe(gradKey, color).header;
-    if (titleEl) titleEl.textContent  = title;
-    if (subEl)   subEl.textContent    = [dates, location].filter(Boolean).join(' · ');
+    const dot1     = document.getElementById('brand-preview-dot1');
+    const dot2     = document.getElementById('brand-preview-dot2');
+    const gradKey  = localStorage.getItem(KEYS.gradient) || 'glow';
+    if (bar)     bar.style.background    = gradientForRecipe(gradKey, color).header;
+    if (titleEl) titleEl.textContent     = title;
+    if (subEl)   subEl.textContent       = [dates, location].filter(Boolean).join(' · ');
+    if (dot1)    dot1.style.background   = color;
+    if (dot2)    dot2.style.background   = color2;
     if (logoEl) {
       if (logo) { logoEl.src = logo; logoEl.classList.remove('hidden'); }
       else      { logoEl.classList.add('hidden'); }
     }
   }
 
-  // sync hex text ↔ color picker
+  // sync hex text ↔ color picker (primary)
   function onBrandColorPicker(val) {
     document.getElementById('s-brand-color-hex').value = val;
     updateBrandPreview();
@@ -534,12 +542,25 @@ const Admin = (() => {
     }
   }
 
+  // sync hex text ↔ color picker (secondary)
+  function onBrandColor2Picker(val) {
+    document.getElementById('s-brand-color2-hex').value = val;
+    updateBrandPreview();
+  }
+  function onBrandColor2Hex(val) {
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+      document.getElementById('s-brand-color2').value = val;
+      updateBrandPreview();
+    }
+  }
+
   function saveSettings() {
     state.event = {
       ...state.event,
       brand: {
-        color: document.getElementById('s-brand-color').value,
-        logo:  document.getElementById('s-brand-logo').value.trim(),
+        color:  document.getElementById('s-brand-color').value,
+        color2: document.getElementById('s-brand-color2').value,
+        logo:   document.getElementById('s-brand-logo').value.trim(),
       },
       title:    document.getElementById('s-title').value,
       dates:    document.getElementById('s-dates').value,
@@ -2204,7 +2225,7 @@ const CONTACTS = [
     selectHistorySection, openHistoryModal, saveHistory, deleteHistory,
     // announcement + settings
     saveAnnouncement, clearAnnouncement,
-    saveSettings, updateBrandPreview, onBrandColorPicker, onBrandColorHex,
+    saveSettings, updateBrandPreview, onBrandColorPicker, onBrandColorHex, onBrandColor2Picker, onBrandColor2Hex,
     selectTypography,
     selectGradient,
     selectCardStyle,

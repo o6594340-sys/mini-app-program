@@ -395,6 +395,20 @@ textarea { resize: vertical; }
 .brand-preview-sub {
   font-size: 11px; color: rgba(255,255,255,0.7);
 }
+.brand-preview-palette {
+  display: flex; gap: 14px; padding: 10px 16px;
+  background: var(--bg-2, #f9f8f5); border-top: 1px solid var(--border);
+}
+.palette-chip {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; color: var(--text-2);
+}
+.palette-dot {
+  display: block; width: 20px; height: 20px;
+  border-radius: 50%; border: 2px solid rgba(0,0,0,0.08);
+  transition: background 0.2s;
+}
+.palette-chip-label { font-weight: 500; }
 
 /* ===== BACKUP ===== */
 .backup-grid {

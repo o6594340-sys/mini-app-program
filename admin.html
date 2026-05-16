@@ -264,12 +264,21 @@
       <div class="settings-block-title">🎨 Брендинг клиента</div>
       <div class="form-grid">
         <div class="form-group">
-          <label>Цвет бренда</label>
+          <label>Основной цвет бренда</label>
           <div class="color-picker-row">
             <input type="color" id="s-brand-color" value="#C9353F"
               oninput="Admin.onBrandColorPicker(this.value)">
             <input type="text"  id="s-brand-color-hex" placeholder="#C9353F" maxlength="7"
               oninput="Admin.onBrandColorHex(this.value)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Дополнительный цвет (табы, бейджи)</label>
+          <div class="color-picker-row">
+            <input type="color" id="s-brand-color2" value="#1A6B8A"
+              oninput="Admin.onBrandColor2Picker(this.value)">
+            <input type="text"  id="s-brand-color2-hex" placeholder="#1A6B8A" maxlength="7"
+              oninput="Admin.onBrandColor2Hex(this.value)">
           </div>
         </div>
         <div class="form-group">
@@ -288,6 +297,10 @@
                 <div class="brand-preview-title" id="brand-preview-title">Название события</div>
                 <div class="brand-preview-sub" id="brand-preview-sub"></div>
               </div>
+            </div>
+            <div class="brand-preview-palette">
+              <div class="palette-chip" id="brand-preview-chip1"><span class="palette-dot" id="brand-preview-dot1"></span><span class="palette-chip-label">Основной</span></div>
+              <div class="palette-chip" id="brand-preview-chip2"><span class="palette-dot" id="brand-preview-dot2"></span><span class="palette-chip-label">Дополнительный</span></div>
             </div>
           </div>
         </div>
