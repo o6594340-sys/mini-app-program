@@ -322,6 +322,8 @@ const Admin = (() => {
     document.getElementById('s-hotel-name').value      = e.hotel?.name       || '';
     document.getElementById('s-hotel-phone').value     = e.hotel?.phone      || '';
     document.getElementById('s-emergency').value       = e.emergency         || '';
+    document.getElementById('s-chat-tg').value        = e.chat?.telegram    || '';
+    document.getElementById('s-chat-wa').value        = e.chat?.whatsapp    || '';
     renderMotionGrid();
     renderCardStyleGrid();
     renderGradientGrid();
@@ -545,6 +547,10 @@ const Admin = (() => {
         phone: document.getElementById('s-hotel-phone').value,
       },
       emergency: document.getElementById('s-emergency').value,
+      chat: {
+        telegram: document.getElementById('s-chat-tg').value.trim(),
+        whatsapp: document.getElementById('s-chat-wa').value.trim(),
+      },
     };
     save(KEYS.event, state.event);
 

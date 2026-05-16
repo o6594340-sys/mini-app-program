@@ -414,7 +414,18 @@ const App = (() => {
       });
     }
 
-    container.innerHTML = `<div class="section-pad">${tabs}${items}${businessHtml}</div>`;
+    const ev = getEvent();
+    const tg = ev.chat?.telegram;
+    const wa = ev.chat?.whatsapp;
+    let chatHtml = '';
+    if (tg || wa) {
+      chatHtml = `<div class="chat-group-row">`;
+      if (tg) chatHtml += `<a class="chat-group-btn chat-tg" href="${tg}" target="_blank">✈️ Telegram-чат группы</a>`;
+      if (wa) chatHtml += `<a class="chat-group-btn chat-wa" href="${wa}" target="_blank">💬 WhatsApp-чат группы</a>`;
+      chatHtml += `</div>`;
+    }
+
+    container.innerHTML = `<div class="section-pad">${tabs}${items}${businessHtml}${chatHtml}</div>`;
   }
 
   function selectProgramDay(i) {
