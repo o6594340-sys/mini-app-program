@@ -25,6 +25,8 @@ const Admin = (() => {
     brandKits:    'admin_brand_kits',
     transfers:    'admin_transfers',
     contacts:     'admin_contacts',
+    memo:         'admin_memo',
+    tabs:         'admin_tabs',
   };
 
   const MOTION_STYLES = {
@@ -91,6 +93,7 @@ const Admin = (() => {
     history:        null,
     transfers:      null,
     contacts:       null,
+    memo:           null,
   };
 
   /* ─── AUTH ────────────────────────────── */
@@ -125,6 +128,7 @@ const Admin = (() => {
     state.history     = getStored(KEYS.history)     || JSON.parse(JSON.stringify(HISTORY));
     state.transfers   = getStored(KEYS.transfers)   || JSON.parse(JSON.stringify(TRANSFERS));
     state.contacts    = getStored(KEYS.contacts)    || JSON.parse(JSON.stringify(CONTACTS));
+    state.memo        = getStored(KEYS.memo)        || JSON.parse(JSON.stringify(MEMO));
     loadAnnouncementPreview();
     loadSettingsForm();
   }
@@ -157,6 +161,7 @@ const Admin = (() => {
     if (name === 'ai-import')   loadAiSection();
     if (name === 'transfers')   renderTransfersSection();
     if (name === 'contacts')    renderContactsSection();
+    if (name === 'memo')        renderMemoSection();
   }
 
   /* ─── SORTABLE ───────────────────────── */
@@ -321,6 +326,17 @@ const Admin = (() => {
     renderGradientGrid();
     renderTypoGrid();
     updateBrandPreview();
+    loadTabVisibility();
+  }
+
+  const TAB_IDS = ['transfers','hotel','sights','cuisine','history','memo','contacts'];
+
+  function loadTabVisibility() {
+    const vis = getStored(KEYS.tabs) || {};
+    TAB_IDS.forEach(id => {
+      const el = document.getElementById('tv-' + id);
+      if (el) el.checked = vis[id] !== false;
+    });
   }
 
   function renderMotionGrid() {
@@ -484,6 +500,14 @@ const Admin = (() => {
       emergency: document.getElementById('s-emergency').value,
     };
     save(KEYS.event, state.event);
+
+    const vis = {};
+    TAB_IDS.forEach(id => {
+      const el = document.getElementById('tv-' + id);
+      if (el) vis[id] = el.checked;
+    });
+    save(KEYS.tabs, vis);
+
     const hint = document.getElementById('settings-saved');
     hint.classList.remove('hidden');
     setTimeout(() => hint.classList.add('hidden'), 2500);
@@ -1197,6 +1221,145 @@ const Admin = (() => {
     } else {
       thumb.classList.add('hidden');
     }
+  }
+
+  /* ─── MEMO ──────────────────────────── */
+  function renderMemoSection() {
+    const list = document.getElementById('memo-sections-list');
+    if (!list) return;
+    if (!state.memo.length) {
+      list.innerHTML = `<div class="empty-state">Разделов нет. Нажмите «+ Добавить раздел».</div>`;
+      return;
+    }
+    list.innerHTML = state.memo.map((sec, si) => `
+      <div class="memo-section-block" data-section="${si}">
+        <div class="memo-section-head">
+          <span class="drag-handle">⠿</span>
+          <span style="font-size:20px">${sec.emoji}</span>
+          <span class="memo-section-head-title">${sec.title}</span>
+          <div class="memo-section-actions">
+            <button class="btn-small" onclick="Admin.openMemoSectionModal(${si})">✏️ Раздел</button>
+            <button class="btn-small btn-small-danger" onclick="Admin.deleteMemoSection(${si})">🗑</button>
+          </div>
+        </div>
+        <div class="memo-section-body">
+          <div id="memo-items-${si}">
+            ${(sec.items || []).map((item, ii) => `
+              <div class="memo-item-row" data-index="${ii}">
+                <span class="drag-handle">⠿</span>
+                <span class="memo-item-icon">${item.icon}</span>
+                <div class="memo-item-body" style="cursor:pointer" onclick="Admin.openMemoItemModal(${si}, ${ii})">
+                  <div class="memo-item-title">${item.title}</div>
+                  <div class="memo-item-text">${item.text}</div>
+                </div>
+                <button class="btn-small btn-small-danger" style="flex-shrink:0" onclick="Admin.deleteMemoItem(${si},${ii})">🗑</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="btn-add" style="margin-top:8px" onclick="Admin.openMemoItemModal(${si}, null)">+ Добавить строку</button>
+        </div>
+      </div>
+    `).join('');
+
+    initSortable('memo-sections-list', (from, to) => {
+      reorderArr(state.memo, from, to);
+      save(KEYS.memo, state.memo);
+      renderMemoSection();
+      showToast('Порядок сохранён');
+    });
+
+    state.memo.forEach((sec, si) => {
+      const itemList = document.getElementById('memo-items-' + si);
+      if (!itemList) return;
+      initSortable('memo-items-' + si, (from, to) => {
+        reorderArr(state.memo[si].items, from, to);
+        save(KEYS.memo, state.memo);
+        showToast('Порядок сохранён');
+        renderMemoSection();
+      });
+    });
+  }
+
+  function openMemoSectionModal(index) {
+    const isNew = index === null;
+    const sec   = isNew ? { emoji: '📌', title: '' } : state.memo[index];
+    document.getElementById('memo-section-modal-title').textContent = isNew ? 'Добавить раздел' : 'Редактировать раздел';
+    document.getElementById('ms-index').value = isNew ? '' : index;
+    document.getElementById('ms-emoji').value = sec.emoji || '📌';
+    document.getElementById('ms-title').value = sec.title || '';
+    document.getElementById('ms-delete-btn').style.display = isNew ? 'none' : 'inline-block';
+    openModal('modal-memo-section');
+  }
+
+  function saveMemoSection() {
+    const idx   = document.getElementById('ms-index').value;
+    const isNew = idx === '';
+    const sec   = {
+      emoji: document.getElementById('ms-emoji').value.trim() || '📌',
+      title: document.getElementById('ms-title').value.trim(),
+      items: isNew ? [] : state.memo[parseInt(idx)].items,
+    };
+    if (!sec.title) { alert('Введите название раздела'); return; }
+    if (isNew) state.memo.push(sec);
+    else       state.memo[parseInt(idx)] = sec;
+    save(KEYS.memo, state.memo);
+    closeModal('modal-memo-section');
+    renderMemoSection();
+    showToast('Сохранено');
+  }
+
+  function deleteMemoSection(index) {
+    if (index === undefined) index = parseInt(document.getElementById('ms-index').value);
+    if (!confirm('Удалить раздел и все его строки?')) return;
+    state.memo.splice(index, 1);
+    save(KEYS.memo, state.memo);
+    closeModal('modal-memo-section');
+    renderMemoSection();
+    showToast('Удалено');
+  }
+
+  function openMemoItemModal(sectionIndex, itemIndex) {
+    const isNew = itemIndex === null;
+    const item  = isNew ? { icon: '📍', title: '', text: '' } : state.memo[sectionIndex].items[itemIndex];
+    document.getElementById('memo-item-modal-title').textContent = isNew ? 'Добавить строку' : 'Редактировать строку';
+    document.getElementById('mi-section-index').value = sectionIndex;
+    document.getElementById('mi-item-index').value    = isNew ? '' : itemIndex;
+    document.getElementById('mi-icon').value          = item.icon  || '📍';
+    document.getElementById('mi-title').value         = item.title || '';
+    document.getElementById('mi-text').value          = item.text  || '';
+    document.getElementById('mi-delete-btn').style.display = isNew ? 'none' : 'inline-block';
+    openModal('modal-memo-item');
+  }
+
+  function saveMemoItem() {
+    const si    = parseInt(document.getElementById('mi-section-index').value);
+    const idx   = document.getElementById('mi-item-index').value;
+    const isNew = idx === '';
+    const item  = {
+      icon:  document.getElementById('mi-icon').value.trim()  || '📍',
+      title: document.getElementById('mi-title').value.trim(),
+      text:  document.getElementById('mi-text').value.trim(),
+    };
+    if (!item.title) { alert('Введите заголовок'); return; }
+    if (!state.memo[si].items) state.memo[si].items = [];
+    if (isNew) state.memo[si].items.push(item);
+    else       state.memo[si].items[parseInt(idx)] = item;
+    save(KEYS.memo, state.memo);
+    closeModal('modal-memo-item');
+    renderMemoSection();
+    showToast('Сохранено');
+  }
+
+  function deleteMemoItem(si, ii) {
+    if (si === undefined) {
+      si = parseInt(document.getElementById('mi-section-index').value);
+      ii = parseInt(document.getElementById('mi-item-index').value);
+    }
+    state.memo[si].items.splice(ii, 1);
+    save(KEYS.memo, state.memo);
+    closeModal('modal-memo-item');
+    renderMemoSection();
+    showToast('Удалено');
   }
 
   /* ─── TRANSFERS ─────────────────────── */
@@ -1986,6 +2149,9 @@ const CONTACTS = [
     copyTemplate, parseProgram, handleFileUpload, handleFileDrop, applyAIResult, discardAIResult,
     // brand kits
     saveBrandKit, applyBrandKit, deleteBrandKit,
+    // memo
+    openMemoSectionModal, saveMemoSection, deleteMemoSection,
+    openMemoItemModal, saveMemoItem, deleteMemoItem,
     // transfers
     openTransferModal, saveTransfer, deleteTransfer,
     // contacts

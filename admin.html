@@ -330,6 +330,20 @@
         <div class="form-group"><label>Телефон отеля</label><input type="text" id="s-hotel-phone"></div>
         <div class="form-group"><label>Экстренный контакт</label><input type="text" id="s-emergency"></div>
       </div>
+      <div class="settings-block-title">👁 Видимость вкладок участника</div>
+      <div class="form-group full">
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:10px">Снимите галочку — вкладка исчезнет у участников. «Программа» всегда видна.</p>
+        <div class="tabs-visibility-grid">
+          <label class="tab-vis-check"><input type="checkbox" id="tv-transfers" checked> 🚌 Трансферы</label>
+          <label class="tab-vis-check"><input type="checkbox" id="tv-hotel" checked> 🏨 Отель</label>
+          <label class="tab-vis-check"><input type="checkbox" id="tv-sights" checked> 🏛 Места</label>
+          <label class="tab-vis-check"><input type="checkbox" id="tv-cuisine" checked> 🥢 Кухня</label>
+          <label class="tab-vis-check"><input type="checkbox" id="tv-history" checked> 📜 История</label>
+          <label class="tab-vis-check"><input type="checkbox" id="tv-memo" checked> 📋 Памятка</label>
+          <label class="tab-vis-check"><input type="checkbox" id="tv-contacts" checked> 📞 Контакты</label>
+        </div>
+      </div>
+
       <button class="btn-primary" onclick="Admin.saveSettings()">Сохранить настройки</button>
       <div class="save-hint hidden" id="settings-saved">✓ Сохранено</div>
     </section>
@@ -459,22 +473,10 @@
     <section id="section-memo" class="admin-section hidden">
       <div class="section-header">
         <h2>📋 Памятка</h2>
-        <p>Практические советы: деньги, розетки, транспорт, правила. Содержимое одинаково для всех событий — редактируется в коде (<code>app.js → renderMemo()</code>).</p>
+        <p>Разделы и строки — добавляйте, удаляйте, меняйте порядок перетаскиванием.</p>
       </div>
-      <div class="card" style="margin-top:8px">
-        <div class="card-body">
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div class="list-item" style="cursor:default"><div class="list-item-left"><span style="font-size:20px">💳</span><div><div class="list-title">Деньги и связь</div><div class="list-sub">Карты, розетки, интернет, часовой пояс</div></div></div></div>
-            <div class="list-item" style="cursor:default"><div class="list-item-left"><span style="font-size:20px">🕌</span><div><div class="list-title">Правила и обычаи</div><div class="list-sub">Мечети, фото, алкоголь, торг на рынках</div></div></div></div>
-            <div class="list-item" style="cursor:default"><div class="list-item-left"><span style="font-size:20px">🚕</span><div><div class="list-title">Здоровье и транспорт</div><div class="list-sub">Вода, такси, турецкий чай</div></div></div></div>
-            <div class="list-item" style="cursor:default"><div class="list-item-left"><span style="font-size:20px">⚠️</span><div><div class="list-title">Важно: праздник</div><div class="list-sub">Ураза-Байрам 27–28 мая — что закрыто</div></div></div></div>
-          </div>
-        </div>
-      </div>
-      <div class="import-hint-box" style="margin-top:16px">
-        <span>ℹ️</span>
-        <span>Памятка — статический раздел. Если нужно изменить содержимое, обратитесь к разработчику (функция <strong>renderMemo()</strong> в <code>app.js</code>).</span>
-      </div>
+      <div id="memo-sections-list"></div>
+      <button class="btn-add" onclick="Admin.openMemoSectionModal(null)">+ Добавить раздел</button>
     </section>
 
   </main>
@@ -699,6 +701,42 @@
       <button class="btn-primary" onclick="Admin.saveHistory()">Сохранить</button>
       <button class="btn-secondary" onclick="Admin.closeModal('modal-history')">Отмена</button>
       <button class="btn-danger" id="h-delete-btn" onclick="Admin.deleteHistory()">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: РАЗДЕЛ ПАМЯТКИ ════════════ -->
+<div class="modal-overlay hidden" id="modal-memo-section">
+  <div class="modal-box">
+    <h3 id="memo-section-modal-title">Добавить раздел</h3>
+    <input type="hidden" id="ms-index">
+    <div class="form-grid">
+      <div class="form-group"><label>Эмодзи</label><input type="text" id="ms-emoji" placeholder="💳" maxlength="2" style="font-size:24px;width:60px;text-align:center"></div>
+      <div class="form-group"><label>Название раздела</label><input type="text" id="ms-title" placeholder="Деньги и связь"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="Admin.saveMemoSection()">Сохранить</button>
+      <button class="btn-secondary" onclick="Admin.closeModal('modal-memo-section')">Отмена</button>
+      <button class="btn-danger" id="ms-delete-btn" onclick="Admin.deleteMemoSection()">Удалить раздел</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: СТРОКА ПАМЯТКИ ════════════ -->
+<div class="modal-overlay hidden" id="modal-memo-item">
+  <div class="modal-box">
+    <h3 id="memo-item-modal-title">Добавить строку</h3>
+    <input type="hidden" id="mi-section-index">
+    <input type="hidden" id="mi-item-index">
+    <div class="form-grid">
+      <div class="form-group"><label>Иконка</label><input type="text" id="mi-icon" placeholder="💴" maxlength="2" style="font-size:24px;width:60px;text-align:center"></div>
+      <div class="form-group"><label>Заголовок</label><input type="text" id="mi-title" placeholder="Карты"></div>
+      <div class="form-group full"><label>Текст</label><textarea id="mi-text" rows="4" placeholder="Описание..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="Admin.saveMemoItem()">Сохранить</button>
+      <button class="btn-secondary" onclick="Admin.closeModal('modal-memo-item')">Отмена</button>
+      <button class="btn-danger" id="mi-delete-btn" onclick="Admin.deleteMemoItem()">Удалить</button>
     </div>
   </div>
 </div>
