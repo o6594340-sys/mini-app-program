@@ -691,9 +691,11 @@ body {
   min-width: 0;
 }
 .header-logo {
-  height: 34px; width: auto; max-width: 80px;
-  object-fit: contain; border-radius: 4px;
+  height: 28px; width: auto; max-width: 160px;
+  object-fit: contain; border-radius: 6px;
   flex-shrink: 0;
+  background: white;
+  padding: 3px 10px;
 }
 
 /* ===== HOTEL TAB ===== */
