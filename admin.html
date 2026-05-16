@@ -54,6 +54,9 @@
       <button class="nav-btn" onclick="Admin.showSection('restaurants', this)">🍜 Рестораны</button>
       <button class="nav-btn" onclick="Admin.showSection('cuisine', this)">🥢 Кухня</button>
       <button class="nav-btn" onclick="Admin.showSection('history', this)">📜 История</button>
+      <button class="nav-btn" onclick="Admin.showSection('transfers', this)">🚌 Трансферы</button>
+      <button class="nav-btn" onclick="Admin.showSection('contacts', this)">📞 Контакты</button>
+      <button class="nav-btn" onclick="Admin.showSection('memo', this)">📋 Памятка</button>
     </nav>
     <div class="sidebar-footer">
       <a href="index.html" target="_blank" class="preview-link">👁 Просмотр сайта ↗</a>
@@ -432,6 +435,48 @@
       <button class="btn-add" onclick="Admin.openHistoryModal(null)">+ Добавить факт</button>
     </section>
 
+    <!-- ТРАНСФЕРЫ -->
+    <section id="section-transfers" class="admin-section hidden">
+      <div class="section-header">
+        <h2>🚌 Трансферы</h2>
+        <p>Маршруты перевозок по дням — отображаются на вкладке «Трансферы».</p>
+      </div>
+      <div id="transfers-list"></div>
+      <button class="btn-add" onclick="Admin.openTransferModal(null, null)">+ Добавить маршрут</button>
+    </section>
+
+    <!-- КОНТАКТЫ -->
+    <section id="section-contacts" class="admin-section hidden">
+      <div class="section-header">
+        <h2>📞 Контакты</h2>
+        <p>Список контактов для вкладки «Контакты».</p>
+      </div>
+      <div id="contacts-list"></div>
+      <button class="btn-add" onclick="Admin.openContactModal(null)">+ Добавить контакт</button>
+    </section>
+
+    <!-- ПАМЯТКА -->
+    <section id="section-memo" class="admin-section hidden">
+      <div class="section-header">
+        <h2>📋 Памятка</h2>
+        <p>Практические советы: деньги, розетки, транспорт, правила. Содержимое одинаково для всех событий — редактируется в коде (<code>app.js → renderMemo()</code>).</p>
+      </div>
+      <div class="card" style="margin-top:8px">
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="list-item" style="cursor:default"><div class="list-item-left"><span style="font-size:20px">💳</span><div><div class="list-title">Деньги и связь</div><div class="list-sub">Карты, розетки, интернет, часовой пояс</div></div></div></div>
+            <div class="list-item" style="cursor:default"><div class="list-item-left"><span style="font-size:20px">🕌</span><div><div class="list-title">Правила и обычаи</div><div class="list-sub">Мечети, фото, алкоголь, торг на рынках</div></div></div></div>
+            <div class="list-item" style="cursor:default"><div class="list-item-left"><span style="font-size:20px">🚕</span><div><div class="list-title">Здоровье и транспорт</div><div class="list-sub">Вода, такси, турецкий чай</div></div></div></div>
+            <div class="list-item" style="cursor:default"><div class="list-item-left"><span style="font-size:20px">⚠️</span><div><div class="list-title">Важно: праздник</div><div class="list-sub">Ураза-Байрам 27–28 мая — что закрыто</div></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="import-hint-box" style="margin-top:16px">
+        <span>ℹ️</span>
+        <span>Памятка — статический раздел. Если нужно изменить содержимое, обратитесь к разработчику (функция <strong>renderMemo()</strong> в <code>app.js</code>).</span>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -654,6 +699,63 @@
       <button class="btn-primary" onclick="Admin.saveHistory()">Сохранить</button>
       <button class="btn-secondary" onclick="Admin.closeModal('modal-history')">Отмена</button>
       <button class="btn-danger" id="h-delete-btn" onclick="Admin.deleteHistory()">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: МАРШРУТ ТРАНСФЕРА ══════════ -->
+<div class="modal-overlay hidden" id="modal-transfer">
+  <div class="modal-box">
+    <h3 id="transfer-modal-title">Добавить маршрут</h3>
+    <input type="hidden" id="tr-day-index">
+    <input type="hidden" id="tr-route-index">
+    <div class="form-grid">
+      <div class="form-group"><label>День</label>
+        <select id="tr-day-select"></select>
+      </div>
+      <div class="form-group"><label>Время отправления</label><input type="text" id="tr-time" placeholder="09:00"></div>
+      <div class="form-group full"><label>Название маршрута</label><input type="text" id="tr-title" placeholder="Отель → Аэропорт"></div>
+      <div class="form-group full"><label>Откуда</label><input type="text" id="tr-from" placeholder="Лобби отеля"></div>
+      <div class="form-group full"><label>Куда</label><input type="text" id="tr-to" placeholder="Аэропорт IST"></div>
+      <div class="form-group"><label>Транспорт</label><input type="text" id="tr-vehicle" placeholder="🚌 MB Sprinter"></div>
+      <div class="form-group"><label>Длительность</label><input type="text" id="tr-duration" placeholder="~50 мин"></div>
+      <div class="form-group full"><label>Место встречи / инструкция</label><input type="text" id="tr-meet" placeholder="09:00 · Лобби с багажом"></div>
+      <div class="form-group full"><label>Примечание (необязательно)</label><input type="text" id="tr-note" placeholder="Рейсы: ..."></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="Admin.saveTransfer()">Сохранить</button>
+      <button class="btn-secondary" onclick="Admin.closeModal('modal-transfer')">Отмена</button>
+      <button class="btn-danger" id="tr-delete-btn" onclick="Admin.deleteTransfer()">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: КОНТАКТ ═════════════════════ -->
+<div class="modal-overlay hidden" id="modal-contact">
+  <div class="modal-box">
+    <h3 id="contact-modal-title">Добавить контакт</h3>
+    <input type="hidden" id="ct-index">
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Эмодзи</label>
+        <div class="emoji-grid" id="ct-emoji-grid"></div>
+        <input type="hidden" id="ct-emoji">
+      </div>
+      <div class="form-group"><label>Роль / должность</label><input type="text" id="ct-role" placeholder="Организатор"></div>
+      <div class="form-group"><label>Имя</label><input type="text" id="ct-name" placeholder="Ольга Харлёнок"></div>
+      <div class="form-group"><label>Телефон</label><input type="text" id="ct-phone" placeholder="+7 910 400-34-60"></div>
+      <div class="form-group"><label>Telegram (с @)</label><input type="text" id="ct-telegram" placeholder="@username"></div>
+      <div class="form-group full"><label>Примечание</label><input type="text" id="ct-note" placeholder="WhatsApp, Telegram · все вопросы"></div>
+      <div class="form-group full">
+        <label class="checkbox-label">
+          <input type="checkbox" id="ct-accent"> Выделить как ключевой контакт (красная рамка)
+        </label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="Admin.saveContact()">Сохранить</button>
+      <button class="btn-secondary" onclick="Admin.closeModal('modal-contact')">Отмена</button>
+      <button class="btn-danger" id="ct-delete-btn" onclick="Admin.deleteContact()">Удалить</button>
     </div>
   </div>
 </div>

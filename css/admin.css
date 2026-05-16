@@ -197,6 +197,7 @@ textarea { resize: vertical; }
   transition: box-shadow 0.15s, transform 0.15s;
 }
 .list-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+.list-item-accent { border-left: 3px solid var(--accent); }
 .list-item-left { display: flex; gap: 12px; align-items: center; }
 .list-time  { font-size: 12px; font-weight: 700; color: var(--accent); width: 44px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
 .list-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }

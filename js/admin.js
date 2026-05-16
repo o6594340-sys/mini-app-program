@@ -23,6 +23,8 @@ const Admin = (() => {
     cardStyle:    'admin_card_style',
     motion:       'admin_motion',
     brandKits:    'admin_brand_kits',
+    transfers:    'admin_transfers',
+    contacts:     'admin_contacts',
   };
 
   const MOTION_STYLES = {
@@ -87,6 +89,8 @@ const Admin = (() => {
     sights:         null,
     cuisine:        null,
     history:        null,
+    transfers:      null,
+    contacts:       null,
   };
 
   /* ─── AUTH ────────────────────────────── */
@@ -119,6 +123,8 @@ const Admin = (() => {
     state.sights      = getStored(KEYS.sights)      || JSON.parse(JSON.stringify(SIGHTS));
     state.cuisine     = getStored(KEYS.cuisine)     || JSON.parse(JSON.stringify(CUISINE));
     state.history     = getStored(KEYS.history)     || JSON.parse(JSON.stringify(HISTORY));
+    state.transfers   = getStored(KEYS.transfers)   || JSON.parse(JSON.stringify(TRANSFERS));
+    state.contacts    = getStored(KEYS.contacts)    || JSON.parse(JSON.stringify(CONTACTS));
     loadAnnouncementPreview();
     loadSettingsForm();
   }
@@ -149,6 +155,8 @@ const Admin = (() => {
     if (name === 'history')     renderHistorySection();
     if (name === 'brandkits')   renderBrandKitsSection();
     if (name === 'ai-import')   loadAiSection();
+    if (name === 'transfers')   renderTransfersSection();
+    if (name === 'contacts')    renderContactsSection();
   }
 
   /* ─── TEMPLATES ──────────────────────── */
@@ -1143,6 +1151,186 @@ const Admin = (() => {
     }
   }
 
+  /* ─── TRANSFERS ─────────────────────── */
+  function renderTransfersSection() {
+    const list = document.getElementById('transfers-list');
+    if (!list) return;
+    if (!state.transfers.length) {
+      list.innerHTML = `<div class="empty-state">Трансферов нет. Нажмите «+ Добавить маршрут».</div>`;
+      return;
+    }
+    let html = '';
+    state.transfers.forEach((day, di) => {
+      html += `
+        <div class="transfers-day-header" style="margin-top:${di > 0 ? 16 : 0}px">
+          <span class="transfers-day-dot" style="background:${day.color}"></span>
+          <span class="transfers-day-label" style="color:${day.color}">${day.day}</span>
+          <span class="transfers-day-date">${day.date}</span>
+        </div>`;
+      if (!day.routes.length) {
+        html += `<div class="empty-state" style="margin:4px 0 8px">Маршрутов нет</div>`;
+      } else {
+        day.routes.forEach((r, ri) => {
+          html += `
+            <div class="list-item" onclick="Admin.openTransferModal(${di}, ${ri})">
+              <div class="list-item-left">
+                <span class="list-time">${r.time}</span>
+                <div>
+                  <div class="list-title">${r.title}</div>
+                  <div class="list-sub">${r.from} → ${r.to} · ${r.vehicle}</div>
+                </div>
+              </div>
+              <span class="list-edit">✏️</span>
+            </div>`;
+        });
+      }
+    });
+    list.innerHTML = html;
+  }
+
+  function openTransferModal(dayIndex, routeIndex) {
+    const isNew = routeIndex === null;
+    const days  = state.transfers;
+
+    const sel = document.getElementById('tr-day-select');
+    sel.innerHTML = days.map((d, i) =>
+      `<option value="${i}">${d.day} · ${d.date}</option>`
+    ).join('');
+
+    let r = { time: '', title: '', from: '', to: '', vehicle: '🚌 Автобус', duration: '', meet: '', note: '' };
+    if (!isNew && dayIndex !== null) {
+      sel.value = dayIndex;
+      r = days[dayIndex].routes[routeIndex];
+    } else if (dayIndex !== null) {
+      sel.value = dayIndex;
+    }
+
+    document.getElementById('transfer-modal-title').textContent = isNew ? 'Добавить маршрут' : 'Редактировать маршрут';
+    document.getElementById('tr-day-index').value   = isNew ? '' : dayIndex;
+    document.getElementById('tr-route-index').value = isNew ? '' : routeIndex;
+    document.getElementById('tr-time').value     = r.time     || '';
+    document.getElementById('tr-title').value    = r.title    || '';
+    document.getElementById('tr-from').value     = r.from     || '';
+    document.getElementById('tr-to').value       = r.to       || '';
+    document.getElementById('tr-vehicle').value  = r.vehicle  || '🚌 Автобус';
+    document.getElementById('tr-duration').value = r.duration || '';
+    document.getElementById('tr-meet').value     = r.meet     || '';
+    document.getElementById('tr-note').value     = r.note     || '';
+    document.getElementById('tr-delete-btn').style.display = isNew ? 'none' : 'inline-block';
+    openModal('modal-transfer');
+  }
+
+  function saveTransfer() {
+    const dayIdx   = parseInt(document.getElementById('tr-day-select').value);
+    const routeIdx = document.getElementById('tr-route-index').value;
+    const isNew    = routeIdx === '';
+    const route = {
+      time:     document.getElementById('tr-time').value.trim(),
+      title:    document.getElementById('tr-title').value.trim(),
+      from:     document.getElementById('tr-from').value.trim(),
+      to:       document.getElementById('tr-to').value.trim(),
+      vehicle:  document.getElementById('tr-vehicle').value.trim(),
+      duration: document.getElementById('tr-duration').value.trim(),
+      meet:     document.getElementById('tr-meet').value.trim(),
+      note:     document.getElementById('tr-note').value.trim() || null,
+    };
+    if (!route.title) { alert('Введите название маршрута'); return; }
+    if (isNew) state.transfers[dayIdx].routes.push(route);
+    else       state.transfers[dayIdx].routes[parseInt(routeIdx)] = route;
+    save(KEYS.transfers, state.transfers);
+    closeModal('modal-transfer');
+    renderTransfersSection();
+    showToast('Сохранено');
+  }
+
+  function deleteTransfer() {
+    const dayIdx   = parseInt(document.getElementById('tr-day-select').value);
+    const routeIdx = parseInt(document.getElementById('tr-route-index').value);
+    state.transfers[dayIdx].routes.splice(routeIdx, 1);
+    save(KEYS.transfers, state.transfers);
+    closeModal('modal-transfer');
+    renderTransfersSection();
+    showToast('Удалено');
+  }
+
+  /* ─── CONTACTS ───────────────────────── */
+  const CONTACT_EMOJIS = ['👩‍💼','👨‍💼','🧭','🚌','🤝','🏨','🚑','🇷🇺','📞','💼','👑','🛡'];
+
+  function renderContactsSection() {
+    const list = document.getElementById('contacts-list');
+    if (!list) return;
+    if (!state.contacts.length) {
+      list.innerHTML = `<div class="empty-state">Контактов нет. Нажмите «+ Добавить контакт».</div>`;
+      return;
+    }
+    list.innerHTML = state.contacts.map((c, i) => `
+      <div class="list-item ${c.accent ? 'list-item-accent' : ''}" onclick="Admin.openContactModal(${i})">
+        <div class="list-item-left">
+          <span style="font-size:22px">${c.emoji}</span>
+          <div>
+            <div class="list-title">${c.name} ${c.accent ? '<span style="color:var(--accent);font-size:11px;font-weight:600">● ключевой</span>' : ''}</div>
+            <div class="list-sub">${c.role} · ${c.phone}</div>
+          </div>
+        </div>
+        <span class="list-edit">✏️</span>
+      </div>
+    `).join('');
+  }
+
+  function openContactModal(index) {
+    const isNew = index === null;
+    const c = isNew
+      ? { emoji: '👤', role: '', name: '', phone: '', telegram: '', note: '', accent: false }
+      : state.contacts[index];
+
+    const grid = document.getElementById('ct-emoji-grid');
+    grid.innerHTML = CONTACT_EMOJIS.map(e =>
+      `<button type="button" class="emoji-btn${c.emoji === e ? ' selected' : ''}" onclick="Admin.selectEmoji('ct-emoji-grid','ct-emoji','${e}')">${e}</button>`
+    ).join('');
+
+    document.getElementById('contact-modal-title').textContent = isNew ? 'Добавить контакт' : 'Редактировать контакт';
+    document.getElementById('ct-index').value    = isNew ? '' : index;
+    document.getElementById('ct-emoji').value    = c.emoji    || '👤';
+    document.getElementById('ct-role').value     = c.role     || '';
+    document.getElementById('ct-name').value     = c.name     || '';
+    document.getElementById('ct-phone').value    = c.phone    || '';
+    document.getElementById('ct-telegram').value = c.telegram || '';
+    document.getElementById('ct-note').value     = c.note     || '';
+    document.getElementById('ct-accent').checked = !!c.accent;
+    document.getElementById('ct-delete-btn').style.display = isNew ? 'none' : 'inline-block';
+    openModal('modal-contact');
+  }
+
+  function saveContact() {
+    const idx   = document.getElementById('ct-index').value;
+    const isNew = idx === '';
+    const contact = {
+      emoji:    document.getElementById('ct-emoji').value    || '👤',
+      role:     document.getElementById('ct-role').value.trim(),
+      name:     document.getElementById('ct-name').value.trim(),
+      phone:    document.getElementById('ct-phone').value.trim(),
+      telegram: document.getElementById('ct-telegram').value.trim() || null,
+      note:     document.getElementById('ct-note').value.trim(),
+      accent:   document.getElementById('ct-accent').checked,
+    };
+    if (!contact.name) { alert('Введите имя контакта'); return; }
+    if (isNew) state.contacts.push(contact);
+    else       state.contacts[parseInt(idx)] = contact;
+    save(KEYS.contacts, state.contacts);
+    closeModal('modal-contact');
+    renderContactsSection();
+    showToast('Сохранено');
+  }
+
+  function deleteContact() {
+    const idx = parseInt(document.getElementById('ct-index').value);
+    state.contacts.splice(idx, 1);
+    save(KEYS.contacts, state.contacts);
+    closeModal('modal-contact');
+    renderContactsSection();
+    showToast('Удалено');
+  }
+
   /* ─── BRAND KITS ─────────────────────── */
   const LABEL_MAP = {
     typography: { modern: 'Modern', executive: 'Executive', editorial: 'Editorial', friendly: 'Friendly', tech: 'Tech' },
@@ -1744,6 +1932,10 @@ const CONTACTS = [
     copyTemplate, parseProgram, handleFileUpload, handleFileDrop, applyAIResult, discardAIResult,
     // brand kits
     saveBrandKit, applyBrandKit, deleteBrandKit,
+    // transfers
+    openTransferModal, saveTransfer, deleteTransfer,
+    // contacts
+    openContactModal, saveContact, deleteContact,
     // emoji
     selectEmoji,
     // image

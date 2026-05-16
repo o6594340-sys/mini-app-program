@@ -765,7 +765,8 @@ const App = (() => {
     let html = `<div class="section-pad">`;
     html += `<div class="section-title">Контакты</div>`;
 
-    CONTACTS.forEach(c => {
+    const contacts = adminData('contacts', CONTACTS);
+    contacts.forEach(c => {
       html += `
         <div class="contact-card ${c.accent ? 'contact-accent' : ''}">
           <div class="contact-header">
