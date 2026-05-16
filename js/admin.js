@@ -31,6 +31,7 @@ const Admin = (() => {
     fontScale:    'admin_font_scale',
     dayTabStyle:  'admin_day_tab_style',
     splash:       'admin_splash',
+    favicon:      'admin_favicon',
   };
 
   const SPLASH_ANIMS = [
@@ -361,6 +362,7 @@ const Admin = (() => {
     renderFontScaleGrid();
     renderDayTabStyleGrid();
     renderSplashSettings();
+    renderFaviconSettings();
     renderBgPicker();
     updateBrandPreview();
     loadTabVisibility();
@@ -464,6 +466,53 @@ const Admin = (() => {
     el.innerHTML = `<div class="splash-inner">${logoHtml}${textHtml}</div>`;
     document.body.appendChild(el);
     setTimeout(() => { el.classList.add('splash-exit'); setTimeout(() => el.remove(), 700); }, 2000);
+  }
+
+  function _faviconCfg() {
+    const raw = localStorage.getItem(KEYS.favicon);
+    const def = { mode: 'logo', emoji: '', url: '' };
+    if (!raw) return def;
+    try { return { ...def, ...JSON.parse(raw) }; } catch { return def; }
+  }
+
+  function renderFaviconSettings() {
+    const cfg  = _faviconCfg();
+    const modes = [
+      { id: 'logo',  label: 'Логотип бренда' },
+      { id: 'emoji', label: 'Emoji'           },
+      { id: 'url',   label: 'Своё изображение' },
+    ];
+    const cGrid = document.getElementById('favicon-mode-grid');
+    if (cGrid) {
+      cGrid.innerHTML = modes.map(m =>
+        `<button class="splash-chip${m.id === cfg.mode ? ' active' : ''}"
+           onclick="Admin.selectFaviconMode('${m.id}')">${m.label}</button>`
+      ).join('');
+    }
+    const eg = document.getElementById('favicon-emoji-group');
+    const ug = document.getElementById('favicon-url-group');
+    if (eg) eg.classList.toggle('hidden', cfg.mode !== 'emoji');
+    if (ug) ug.classList.toggle('hidden', cfg.mode !== 'url');
+    const ef = document.getElementById('favicon-emoji');
+    const uf = document.getElementById('favicon-url');
+    if (ef) ef.value = cfg.emoji || '';
+    if (uf) uf.value = cfg.url   || '';
+  }
+
+  function selectFaviconMode(mode) {
+    const cfg = { ..._faviconCfg(), mode };
+    localStorage.setItem(KEYS.favicon, JSON.stringify(cfg));
+    renderFaviconSettings();
+  }
+
+  function saveFaviconEmoji() {
+    const cfg = { ..._faviconCfg(), emoji: document.getElementById('favicon-emoji').value.trim() };
+    localStorage.setItem(KEYS.favicon, JSON.stringify(cfg));
+  }
+
+  function saveFaviconUrl() {
+    const cfg = { ..._faviconCfg(), url: document.getElementById('favicon-url').value.trim() };
+    localStorage.setItem(KEYS.favicon, JSON.stringify(cfg));
   }
 
   function renderDayTabStyleGrid() {
@@ -2395,6 +2444,7 @@ const CONTACTS = [
     saveSettings, updateBrandPreview, onBrandColorPicker, onBrandColorHex, onBrandColor2Picker, onBrandColor2Hex,
     selectFontScale, selectDayTabStyle,
     toggleSplash, selectSplashContent, selectSplashAnim, previewSplashAnim, saveSplashSlogan, previewSplash,
+    selectFaviconMode, saveFaviconEmoji, saveFaviconUrl,
     selectTypography,
     selectGradient,
     selectCardStyle,

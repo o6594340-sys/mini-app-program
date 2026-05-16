@@ -329,6 +329,23 @@
         </div>
       </div>
 
+      <div class="settings-block-title">🔖 Favicon (иконка вкладки)</div>
+      <div class="form-group full">
+        <label>Источник иконки</label>
+        <div class="splash-content-grid" id="favicon-mode-grid"></div>
+      </div>
+      <div class="form-group full hidden" id="favicon-emoji-group">
+        <label>Emoji</label>
+        <input type="text" id="favicon-emoji" placeholder="🕌" maxlength="4" oninput="Admin.saveFaviconEmoji()">
+      </div>
+      <div class="form-group full hidden" id="favicon-url-group">
+        <label>Ссылка на изображение</label>
+        <div class="img-field">
+          <input type="text" id="favicon-url" placeholder="https://..." oninput="Admin.saveFaviconUrl()">
+          <label class="img-pick-btn">📎 Выбрать<input type="file" accept="image/*" onchange="Admin.pickImage(this,'favicon-url');Admin.saveFaviconUrl()"></label>
+        </div>
+      </div>
+
       <div class="settings-block-title">✨ Анимации</div>
       <div class="form-group full">
         <label>Стиль переходов между экранами</label>

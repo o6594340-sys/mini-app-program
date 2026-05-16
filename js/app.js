@@ -172,6 +172,41 @@ const App = (() => {
     if (style !== 'elevated') document.body.classList.add('cs-' + style);
   }
 
+  function emojiToDataUrl(emoji) {
+    try {
+      const c = document.createElement('canvas');
+      c.width = 32; c.height = 32;
+      const ctx = c.getContext('2d');
+      ctx.font = '26px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(emoji, 16, 18);
+      return c.toDataURL('image/png');
+    } catch { return ''; }
+  }
+
+  function applyFavicon() {
+    const raw = localStorage.getItem('admin_favicon');
+    if (!raw) return;
+    let cfg;
+    try { cfg = JSON.parse(raw); } catch { return; }
+
+    let href = '';
+    if (cfg.mode === 'logo') {
+      const ev = getEvent();
+      href = ev.brand?.logo || '';
+    } else if (cfg.mode === 'emoji' && cfg.emoji) {
+      href = emojiToDataUrl(cfg.emoji);
+    } else if (cfg.mode === 'url' && cfg.url) {
+      href = cfg.url;
+    }
+    if (!href) return;
+
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+    link.href = href;
+  }
+
   function showSplash() {
     const raw = localStorage.getItem('admin_splash');
     if (!raw) return;
@@ -261,6 +296,7 @@ const App = (() => {
     applyGradient();
     applyMotion();
     applyCardStyle();
+    applyFavicon();
     applyFontScale();
     applyBackground();
     applyTabVisibility();
