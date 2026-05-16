@@ -403,7 +403,7 @@ const Admin = (() => {
            <span class="scale-card-letter" style="font-size:24px">${a.icon}</span>
            <span style="font-size:12px;font-weight:700;color:var(--text)">${a.name}</span>
            <span class="scale-card-desc">${a.desc}</span>
-           <button class="splash-preview-btn" onclick="Admin.selectSplashAnim('${a.id}');Admin.previewSplash()">▶ Посмотреть</button>
+           <button class="splash-preview-btn" onclick="event.stopPropagation();Admin.previewSplashAnim('${a.id}')">▶ Посмотреть</button>
            ${a.id === cfg.animation ? '<span class="motion-card-check">✓</span>' : ''}
          </div>`
       ).join('');
@@ -423,6 +423,12 @@ const Admin = (() => {
   function selectSplashAnim(id) {
     _patchSplash({ animation: id });
     renderSplashSettings();
+  }
+
+  function previewSplashAnim(id) {
+    _patchSplash({ animation: id });
+    renderSplashSettings();
+    setTimeout(previewSplash, 50);
   }
 
   function saveSplashSlogan() {
@@ -2388,7 +2394,7 @@ const CONTACTS = [
     saveAnnouncement, clearAnnouncement,
     saveSettings, updateBrandPreview, onBrandColorPicker, onBrandColorHex, onBrandColor2Picker, onBrandColor2Hex,
     selectFontScale, selectDayTabStyle,
-    toggleSplash, selectSplashContent, selectSplashAnim, saveSplashSlogan, previewSplash,
+    toggleSplash, selectSplashContent, selectSplashAnim, previewSplashAnim, saveSplashSlogan, previewSplash,
     selectTypography,
     selectGradient,
     selectCardStyle,
