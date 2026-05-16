@@ -448,6 +448,9 @@ const Admin = (() => {
     if (!GRADIENT_RECIPES[key]) return;
     localStorage.setItem(KEYS.gradient, key);
     renderGradientGrid();
+    const accent = document.getElementById('s-brand-color').value || '#C9353F';
+    const bar = document.getElementById('brand-preview-bar');
+    if (bar) bar.style.background = gradientForRecipe(key, accent).header;
   }
 
   function renderTypoGrid() {
@@ -496,7 +499,8 @@ const Admin = (() => {
     const titleEl  = document.getElementById('brand-preview-title');
     const subEl    = document.getElementById('brand-preview-sub');
     const logoEl   = document.getElementById('brand-preview-logo');
-    if (bar)     bar.style.background = color;
+    const gradKey = localStorage.getItem(KEYS.gradient) || 'glow';
+    if (bar)     bar.style.background = gradientForRecipe(gradKey, color).header;
     if (titleEl) titleEl.textContent  = title;
     if (subEl)   subEl.textContent    = [dates, location].filter(Boolean).join(' · ');
     if (logoEl) {
