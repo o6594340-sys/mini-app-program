@@ -32,6 +32,7 @@ const Admin = (() => {
     dayTabStyle:  'admin_day_tab_style',
     splash:       'admin_splash',
     favicon:      'admin_favicon',
+    whiteLabel:   'admin_white_label',
   };
 
   const SPLASH_ANIMS = [
@@ -363,6 +364,7 @@ const Admin = (() => {
     renderDayTabStyleGrid();
     renderSplashSettings();
     renderFaviconSettings();
+    loadWhiteLabelToggle();
     renderBgPicker();
     updateBrandPreview();
     loadTabVisibility();
@@ -466,6 +468,16 @@ const Admin = (() => {
     el.innerHTML = `<div class="splash-inner">${logoHtml}${textHtml}</div>`;
     document.body.appendChild(el);
     setTimeout(() => { el.classList.add('splash-exit'); setTimeout(() => el.remove(), 700); }, 2000);
+  }
+
+  function loadWhiteLabelToggle() {
+    const el = document.getElementById('white-label-toggle');
+    if (el) el.checked = localStorage.getItem(KEYS.whiteLabel) === 'true';
+  }
+
+  function toggleWhiteLabel() {
+    const checked = document.getElementById('white-label-toggle').checked;
+    localStorage.setItem(KEYS.whiteLabel, checked ? 'true' : 'false');
   }
 
   function _faviconCfg() {
@@ -2445,6 +2457,7 @@ const CONTACTS = [
     selectFontScale, selectDayTabStyle,
     toggleSplash, selectSplashContent, selectSplashAnim, previewSplashAnim, saveSplashSlogan, previewSplash,
     selectFaviconMode, saveFaviconEmoji, saveFaviconUrl,
+    toggleWhiteLabel,
     selectTypography,
     selectGradient,
     selectCardStyle,

@@ -172,6 +172,12 @@ const App = (() => {
     if (style !== 'elevated') document.body.classList.add('cs-' + style);
   }
 
+  function applyWhiteLabel() {
+    const hidden = localStorage.getItem('admin_white_label') === 'true';
+    const el = document.getElementById('mice-attribution');
+    if (el) el.style.display = hidden ? 'none' : '';
+  }
+
   function emojiToDataUrl(emoji) {
     try {
       const c = document.createElement('canvas');
@@ -296,6 +302,7 @@ const App = (() => {
     applyGradient();
     applyMotion();
     applyCardStyle();
+    applyWhiteLabel();
     applyFavicon();
     applyFontScale();
     applyBackground();
