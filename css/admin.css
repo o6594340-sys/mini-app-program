@@ -737,6 +737,39 @@ textarea { resize: vertical; }
 .btn-small-danger { color: #e53935; border-color: #FFCDD2; }
 .btn-small-danger:hover { background: #FFF5F5; }
 
+/* ===== BG PRESET PICKER ===== */
+.bg-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.bg-swatch {
+  border-radius: 12px;
+  height: 72px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+  transition: border-color .15s, transform .12s;
+  background-size: cover;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.bg-swatch.selected { border-color: var(--accent); }
+.bg-swatch:hover { border-color: rgba(201,53,63,.4); transform: translateY(-2px); }
+.bg-swatch-label {
+  font-size: 11px; font-weight: 600;
+  color: #333;
+  background: rgba(255,255,255,.88);
+  padding: 2px 8px;
+  border-radius: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  pointer-events: none;
+}
+
 /* ===== INPUT CLEAR BUTTON ===== */
 .input-wrap { position: relative; display: flex; align-items: center; }
 .input-wrap input { flex: 1; padding-right: 28px; }

@@ -864,3 +864,19 @@ const MEMO = [
     ],
   },
 ];
+
+/* ─── BG PRESETS ─────────────────────────── */
+const BG_PRESETS = [
+  { id: 'white',    label: 'Белый',    bgColor: '#ffffff' },
+  { id: 'cream',    label: 'Крем',     bgColor: '#fdfaf6' },
+  { id: 'sky',      label: 'Небо',     bg: 'linear-gradient(160deg,#eef4ff 0%,#f8fbff 100%)' },
+  { id: 'mint',     label: 'Мята',     bg: 'linear-gradient(160deg,#edfff6 0%,#f8fffc 100%)' },
+  { id: 'blush',    label: 'Закат',    bg: 'linear-gradient(135deg,#fff5ee 0%,#fff0f6 50%,#f8f0ff 100%)' },
+  { id: 'lavender', label: 'Лаванда',  bg: 'linear-gradient(160deg,#f5f0ff 0%,#fdf8ff 100%)' },
+  { id: 'glow',     label: 'Блики',    bgColor: '#ffffff', bgImage: 'radial-gradient(ellipse at 15% 15%,rgba(255,235,150,0.35) 0%,transparent 55%),radial-gradient(ellipse at 85% 80%,rgba(180,210,255,0.35) 0%,transparent 55%)' },
+  { id: 'stripes',  label: 'Полосы',   bgColor: '#ffffff', bgImage: 'repeating-linear-gradient(135deg,rgba(0,0,0,0.035) 0px,rgba(0,0,0,0.035) 1px,transparent 1px,transparent 16px)' },
+  { id: 'grid',     label: 'Сетка',    bgColor: '#ffffff', bgImage: 'linear-gradient(rgba(0,0,0,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.05) 1px,transparent 1px)', bgSize: '24px 24px' },
+  { id: 'linen',    label: 'Лён',      bgColor: '#faf7f2', bgImage: 'repeating-linear-gradient(0deg,rgba(0,0,0,0.03) 0,rgba(0,0,0,0.03) 1px,transparent 1px,transparent 5px),repeating-linear-gradient(90deg,rgba(0,0,0,0.02) 0,rgba(0,0,0,0.02) 1px,transparent 1px,transparent 5px)' },
+  { id: 'dots',     label: 'Точки',    bgColor: '#ffffff', bgImage: 'radial-gradient(circle,rgba(0,0,0,0.08) 1px,transparent 1px)', bgSize: '18px 18px' },
+  { id: 'velvet',   label: 'Бархат',   bg: 'linear-gradient(135deg,#f0ebff 0%,#fce8ff 50%,#ebe8ff 100%)' },
+];

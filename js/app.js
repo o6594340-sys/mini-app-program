@@ -167,6 +167,27 @@ const App = (() => {
     if (style !== 'elevated') document.body.classList.add('cs-' + style);
   }
 
+  function applyBackground() {
+    const raw = localStorage.getItem('admin_bg');
+    if (raw === null) return;
+    try {
+      const p = BG_PRESETS[+JSON.parse(raw)];
+      if (!p) return;
+      const b = document.body;
+      b.style.background = '';
+      b.style.backgroundImage = '';
+      b.style.backgroundSize = '';
+      b.style.backgroundColor = '';
+      if (p.bg) {
+        b.style.background = p.bg;
+      } else {
+        if (p.bgColor) b.style.backgroundColor = p.bgColor;
+        if (p.bgImage) b.style.backgroundImage = p.bgImage;
+        if (p.bgSize)  b.style.backgroundSize  = p.bgSize;
+      }
+    } catch {}
+  }
+
   /* ─── INIT ────────────────────────────── */
   function applyTabVisibility() {
     try {
@@ -195,6 +216,7 @@ const App = (() => {
     applyGradient();
     applyMotion();
     applyCardStyle();
+    applyBackground();
     applyTabVisibility();
     renderAnnouncement();
     renderProgram();

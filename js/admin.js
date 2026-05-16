@@ -27,6 +27,7 @@ const Admin = (() => {
     contacts:     'admin_contacts',
     memo:         'admin_memo',
     tabs:         'admin_tabs',
+    bg:           'admin_bg',
   };
 
   const MOTION_STYLES = {
@@ -325,8 +326,28 @@ const Admin = (() => {
     renderCardStyleGrid();
     renderGradientGrid();
     renderTypoGrid();
+    renderBgPicker();
     updateBrandPreview();
     loadTabVisibility();
+  }
+
+  function renderBgPicker() {
+    const grid = document.getElementById('bg-preset-grid');
+    if (!grid) return;
+    const saved = +(localStorage.getItem(KEYS.bg) ?? '1');
+    grid.innerHTML = BG_PRESETS.map((p, i) => {
+      const styleStr = p.bg
+        ? `background:${p.bg}`
+        : `background-color:${p.bgColor||'#fff'};background-image:${p.bgImage||''};background-size:${p.bgSize||'auto'}`;
+      return `<div class="bg-swatch${i === saved ? ' selected' : ''}" onclick="Admin.selectBg(${i})" style="${styleStr}">
+        <span class="bg-swatch-label">${p.label}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function selectBg(i) {
+    localStorage.setItem(KEYS.bg, JSON.stringify(i));
+    renderBgPicker();
   }
 
   const TAB_IDS = ['transfers','hotel','sights','cuisine','history','memo','contacts'];
@@ -2145,6 +2166,7 @@ const CONTACTS = [
     selectGradient,
     selectCardStyle,
     selectMotion,
+    selectBg,
     // import
     copyTemplate, parseProgram, handleFileUpload, handleFileDrop, applyAIResult, discardAIResult,
     // brand kits
