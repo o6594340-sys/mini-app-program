@@ -172,6 +172,11 @@ const App = (() => {
     if (style !== 'elevated') document.body.classList.add('cs-' + style);
   }
 
+  function applyFontScale() {
+    const scale = parseFloat(localStorage.getItem('admin_font_scale') || '1');
+    document.body.style.zoom = scale;
+  }
+
   function applyBackground() {
     const raw = localStorage.getItem('admin_bg');
     if (raw === null) return;
@@ -222,6 +227,7 @@ const App = (() => {
     applyGradient();
     applyMotion();
     applyCardStyle();
+    applyFontScale();
     applyBackground();
     applyTabVisibility();
     renderAnnouncement();

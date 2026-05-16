@@ -1,4 +1,4 @@
-const CACHE = 'mice-v31';
+const CACHE = 'mice-v32';
 const OFFLINE = [
   '/',
   '/index.html',

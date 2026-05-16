@@ -526,6 +526,29 @@ textarea { resize: vertical; }
   font-size: 10px; color: #9CA3AF; margin-top: 6px;
 }
 
+/* ===== FONT SCALE SELECTOR ===== */
+.font-scale-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+.scale-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 10px 12px;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  text-align: center;
+}
+.scale-card:hover  { border-color: #9CA3AF; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.scale-card.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201,53,63,.12); }
+.scale-card-letter { font-weight: 800; line-height: 1; color: var(--text); font-family: var(--font-disp, sans-serif); }
+.scale-card-desc   { font-size: 11px; color: var(--text-2); }
+
 /* ===== MOTION STYLE SELECTOR ===== */
 .motion-grid {
   display: grid;

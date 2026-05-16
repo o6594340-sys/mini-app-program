@@ -28,7 +28,14 @@ const Admin = (() => {
     memo:         'admin_memo',
     tabs:         'admin_tabs',
     bg:           'admin_bg',
+    fontScale:    'admin_font_scale',
   };
+
+  const FONT_SCALES = [
+    { value: 0.9, label: 'А−', desc: 'Компактный' },
+    { value: 1.0, label: 'А',  desc: 'Стандартный' },
+    { value: 1.1, label: 'А+', desc: 'Крупный' },
+  ];
 
   const MOTION_STYLES = {
     swift:   { icon: '⚡', name: 'Swift',   desc: 'Быстрые функциональные переходы', spec: '0.25s ease' },
@@ -331,9 +338,28 @@ const Admin = (() => {
     renderCardStyleGrid();
     renderGradientGrid();
     renderTypoGrid();
+    renderFontScaleGrid();
     renderBgPicker();
     updateBrandPreview();
     loadTabVisibility();
+  }
+
+  function renderFontScaleGrid() {
+    const grid = document.getElementById('font-scale-grid');
+    if (!grid) return;
+    const saved = parseFloat(localStorage.getItem(KEYS.fontScale) || '1');
+    grid.innerHTML = FONT_SCALES.map(s =>
+      `<div class="scale-card${s.value === saved ? ' active' : ''}" onclick="Admin.selectFontScale(${s.value})">
+        <span class="scale-card-letter" style="font-size:${14 + (s.value - 1) * 30}px">${s.label}</span>
+        <span class="scale-card-desc">${s.desc}</span>
+        ${s.value === saved ? '<span class="motion-card-check">✓</span>' : ''}
+      </div>`
+    ).join('');
+  }
+
+  function selectFontScale(val) {
+    localStorage.setItem(KEYS.fontScale, val);
+    renderFontScaleGrid();
   }
 
   function renderBgPicker() {
@@ -2226,6 +2252,7 @@ const CONTACTS = [
     // announcement + settings
     saveAnnouncement, clearAnnouncement,
     saveSettings, updateBrandPreview, onBrandColorPicker, onBrandColorHex, onBrandColor2Picker, onBrandColor2Hex,
+    selectFontScale,
     selectTypography,
     selectGradient,
     selectCardStyle,
