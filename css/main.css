@@ -1006,3 +1006,64 @@ body.cs-outlined .transfer-card {
   padding: 6px 10px;
   border-left: 3px solid #F59E0B;
 }
+
+/* ═══════════════════════════════════════════
+   ТЁМНАЯ ТЕМА (автоматически при тёмном фоне)
+═══════════════════════════════════════════ */
+[data-theme="dark"] {
+  --surface:        rgba(255,255,255,0.07);
+  --bg-secondary:   rgba(255,255,255,0.05);
+  --border:         rgba(255,255,255,0.10);
+  --text:           #f1f5f9;
+  --text-secondary: rgba(255,255,255,0.58);
+  --text-hint:      rgba(255,255,255,0.35);
+  --accent-light:   rgba(201,53,63,0.18);
+  --shadow:         0 2px 12px rgba(0,0,0,0.45);
+  --shadow-lg:      0 8px 40px rgba(0,0,0,0.55);
+}
+
+[data-theme="dark"] .tab-bar {
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .tab {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.55);
+}
+[data-theme="dark"] .card,
+[data-theme="dark"] .business-card,
+[data-theme="dark"] .sight-card,
+[data-theme="dark"] .rest-card,
+[data-theme="dark"] .cuisine-card,
+[data-theme="dark"] .fact-card,
+[data-theme="dark"] .transfer-card,
+[data-theme="dark"] .contact-card,
+[data-theme="dark"] .next-block,
+[data-theme="dark"] .tip-card {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow: none;
+}
+[data-theme="dark"] .wifi-row {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .faq-modal-box {
+  background: #1c1c1e;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+[data-theme="dark"] .faq-search {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
+  color: #f1f5f9;
+}
+[data-theme="dark"] .hotel-quickgrid { background: rgba(255,255,255,0.05); }
+[data-theme="dark"] .hotel-quickitem { border-right-color: rgba(255,255,255,0.08); }
+[data-theme="dark"] .hotel-tips { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
+[data-theme="dark"] .hotel-address-card { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+[data-theme="dark"] .transfer-note { background: rgba(245,158,11,0.12); color: #FCD34D; }
+[data-theme="dark"] .announcement-bar { opacity: 0.92; }
+[data-theme="dark"] .section-title { color: rgba(255,255,255,0.45); }
+[data-theme="dark"] .now-block { background: rgba(255,255,255,0.05); }

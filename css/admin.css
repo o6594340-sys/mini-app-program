@@ -760,6 +760,18 @@ textarea { resize: vertical; }
 }
 .bg-swatch.selected { border-color: var(--accent); }
 .bg-swatch:hover { border-color: rgba(201,53,63,.4); transform: translateY(-2px); }
+.bg-group-label {
+  grid-column: 1 / -1;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text-2);
+  padding-top: 2px;
+}
+.bg-group-sep {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
 .bg-swatch-label {
   font-size: 11px; font-weight: 600;
   color: #333;

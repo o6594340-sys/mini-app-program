@@ -185,6 +185,7 @@ const App = (() => {
         if (p.bgImage) b.style.backgroundImage = p.bgImage;
         if (p.bgSize)  b.style.backgroundSize  = p.bgSize;
       }
+      b.dataset.theme = p.dark ? 'dark' : 'light';
     } catch {}
   }
 

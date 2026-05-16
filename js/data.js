@@ -879,4 +879,17 @@ const BG_PRESETS = [
   { id: 'linen',    label: 'Лён',      bgColor: '#faf7f2', bgImage: 'repeating-linear-gradient(0deg,rgba(0,0,0,0.03) 0,rgba(0,0,0,0.03) 1px,transparent 1px,transparent 5px),repeating-linear-gradient(90deg,rgba(0,0,0,0.02) 0,rgba(0,0,0,0.02) 1px,transparent 1px,transparent 5px)' },
   { id: 'dots',     label: 'Точки',    bgColor: '#ffffff', bgImage: 'radial-gradient(circle,rgba(0,0,0,0.08) 1px,transparent 1px)', bgSize: '18px 18px' },
   { id: 'velvet',   label: 'Бархат',   bg: 'linear-gradient(135deg,#f0ebff 0%,#fce8ff 50%,#ebe8ff 100%)' },
+  // — тёмные —
+  { id: 'black',     label: 'Чёрный',   dark: true, bgColor: '#0a0a0a' },
+  { id: 'graphite',  label: 'Графит',   dark: true, bgColor: '#1c1c1e' },
+  { id: 'anthracite',label: 'Антрацит', dark: true, bgColor: '#2d2d30' },
+  { id: 'night',     label: 'Ночь',     dark: true, bg: 'linear-gradient(135deg,#0a0f1e 0%,#111827 100%)' },
+  { id: 'midnight',  label: 'Полночь',  dark: true, bg: 'linear-gradient(135deg,#0c1445 0%,#1a1a2e 100%)' },
+  { id: 'cobalt',    label: 'Кобальт',  dark: true, bg: 'linear-gradient(135deg,#0d1b3e 0%,#1a237e 100%)' },
+  { id: 'sapphire',  label: 'Сапфир',   dark: true, bg: 'linear-gradient(135deg,#0d2137 0%,#1a3a6b 100%)' },
+  { id: 'navy',      label: 'Флот',     dark: true, bg: 'linear-gradient(135deg,#0a1628 0%,#1e3a5f 100%)' },
+  { id: 'steel',     label: 'Сталь',    dark: true, bg: 'linear-gradient(135deg,#1a2535 0%,#2d4a6b 100%)' },
+  { id: 'emerald',   label: 'Изумруд',  dark: true, bg: 'linear-gradient(135deg,#022c22 0%,#064e3b 100%)' },
+  { id: 'malachite', label: 'Малахит',  dark: true, bg: 'linear-gradient(135deg,#0f2b1f 0%,#1a4332 100%)' },
+  { id: 'amethyst',  label: 'Аметист',  dark: true, bg: 'linear-gradient(135deg,#1a0533 0%,#2d0a5e 100%)' },
 ];

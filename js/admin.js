@@ -337,14 +337,24 @@ const Admin = (() => {
     const grid = document.getElementById('bg-preset-grid');
     if (!grid) return;
     const saved = +(localStorage.getItem(KEYS.bg) ?? '1');
-    grid.innerHTML = BG_PRESETS.map((p, i) => {
+
+    const swatch = (p, i) => {
       const styleStr = p.bg
         ? `background:${p.bg}`
         : `background-color:${p.bgColor||'#fff'};background-image:${p.bgImage||''};background-size:${p.bgSize||'auto'}`;
+      const labelStyle = p.dark ? 'color:rgba(255,255,255,0.85);background:rgba(0,0,0,0.4)' : '';
       return `<div class="bg-swatch${i === saved ? ' selected' : ''}" onclick="Admin.selectBg(${i})" style="${styleStr}">
-        <span class="bg-swatch-label">${p.label}</span>
+        <span class="bg-swatch-label" style="${labelStyle}">${p.label}</span>
       </div>`;
-    }).join('');
+    };
+
+    const lightHtml = BG_PRESETS.map((p, i) => p.dark ? '' : swatch(p, i)).join('');
+    const darkHtml  = BG_PRESETS.map((p, i) => p.dark ? swatch(p, i) : '').join('');
+
+    grid.innerHTML =
+      `<div class="bg-group-label">Светлые</div>${lightHtml}` +
+      `<div class="bg-group-label bg-group-sep">Тёмные</div>${darkHtml}`;
+
     applyBgPreview(saved);
   }
 
@@ -363,6 +373,8 @@ const Admin = (() => {
       if (p.bgImage) strip.style.backgroundImage = p.bgImage;
       if (p.bgSize)  strip.style.backgroundSize  = p.bgSize;
     }
+    const label = strip.querySelector('.bg-preview-label');
+    if (label) label.style.color = p.dark ? 'rgba(255,255,255,0.75)' : '#999';
   }
 
   function selectBg(i) {
