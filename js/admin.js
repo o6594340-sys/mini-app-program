@@ -343,6 +343,25 @@ const Admin = (() => {
         <span class="bg-swatch-label">${p.label}</span>
       </div>`;
     }).join('');
+    applyBgPreview(saved);
+  }
+
+  function applyBgPreview(i) {
+    const p = BG_PRESETS[i];
+    if (!p) return;
+    const b = document.querySelector('.admin-main');
+    if (!b) return;
+    b.style.background = '';
+    b.style.backgroundImage = '';
+    b.style.backgroundSize = '';
+    b.style.backgroundColor = '';
+    if (p.bg) {
+      b.style.background = p.bg;
+    } else {
+      if (p.bgColor) b.style.backgroundColor = p.bgColor;
+      if (p.bgImage) b.style.backgroundImage = p.bgImage;
+      if (p.bgSize)  b.style.backgroundSize  = p.bgSize;
+    }
   }
 
   function selectBg(i) {
