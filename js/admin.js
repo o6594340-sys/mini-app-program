@@ -159,6 +159,30 @@ const Admin = (() => {
     if (name === 'contacts')    renderContactsSection();
   }
 
+  /* ─── SORTABLE ───────────────────────── */
+  function initSortable(listId, onReorder) {
+    const el = document.getElementById(listId);
+    if (!el || typeof Sortable === 'undefined') return;
+    if (el._sortable) el._sortable.destroy();
+    el._sortable = Sortable.create(el, {
+      handle: '.drag-handle',
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      onEnd({ oldIndex, newIndex }) {
+        if (oldIndex === newIndex) return;
+        onReorder(oldIndex, newIndex);
+        el.querySelectorAll('.list-item[data-index]').forEach((item, i) => {
+          item.dataset.index = i;
+        });
+      },
+    });
+  }
+
+  function reorderArr(arr, from, to) {
+    arr.splice(to, 0, arr.splice(from, 1)[0]);
+  }
+
   /* ─── TEMPLATES ──────────────────────── */
   function renderTemplatesSection() {
     const activeKey = localStorage.getItem('admin_template') || '';
@@ -563,7 +587,8 @@ const Admin = (() => {
       const trackColor = TRACK_COLORS[s.track || ''] || '#6B7280';
       const trackLabel = TRACK_LABELS[s.track || ''] || s.track;
       return `
-        <div class="list-item" onclick="Admin.openBusinessModal(${i})">
+        <div class="list-item" data-index="${i}" onclick="Admin.openBusinessModal(+this.dataset.index)">
+          <span class="drag-handle">⠿</span>
           <div class="list-item-left">
             <span class="list-time">${s.time}</span>
             <div>
@@ -578,6 +603,11 @@ const Admin = (() => {
         </div>
       `;
     }).join('');
+    initSortable('business-list', (from, to) => {
+      reorderArr(state.business, from, to);
+      save(KEYS.business, state.business);
+      showToast('Порядок сохранён');
+    });
   }
 
   function openBusinessModal(index) {
@@ -751,7 +781,8 @@ const Admin = (() => {
       return;
     }
     list.innerHTML = state.sights.map((s, i) => `
-      <div class="list-item" onclick="Admin.openSightModal(${i})">
+      <div class="list-item" data-index="${i}" onclick="Admin.openSightModal(+this.dataset.index)">
+        <span class="drag-handle">⠿</span>
         <div class="list-item-left">
           <span style="font-size:22px">${s.emoji}</span>
           <div>
@@ -762,6 +793,11 @@ const Admin = (() => {
         <span class="list-edit">✏️</span>
       </div>
     `).join('');
+    initSortable('sights-list', (from, to) => {
+      reorderArr(state.sights, from, to);
+      save(KEYS.sights, state.sights);
+      showToast('Порядок сохранён');
+    });
   }
 
   function openSightModal(index) {
@@ -835,7 +871,8 @@ const Admin = (() => {
       return;
     }
     list.innerHTML = state.restaurants.map((r, i) => `
-      <div class="list-item" onclick="Admin.openRestaurantModal(${i})">
+      <div class="list-item" data-index="${i}" onclick="Admin.openRestaurantModal(+this.dataset.index)">
+        <span class="drag-handle">⠿</span>
         <div class="list-item-left">
           <span style="font-size:22px">${r.emoji}</span>
           <div>
@@ -846,6 +883,11 @@ const Admin = (() => {
         <span class="list-edit">✏️</span>
       </div>
     `).join('');
+    initSortable('restaurants-list', (from, to) => {
+      reorderArr(state.restaurants, from, to);
+      save(KEYS.restaurants, state.restaurants);
+      showToast('Порядок сохранён');
+    });
   }
 
   function openRestaurantModal(index) {
@@ -920,7 +962,8 @@ const Admin = (() => {
       return;
     }
     list.innerHTML = state.cuisine.map((d, i) => `
-      <div class="list-item" onclick="Admin.openCuisineModal(${i})">
+      <div class="list-item" data-index="${i}" onclick="Admin.openCuisineModal(+this.dataset.index)">
+        <span class="drag-handle">⠿</span>
         <div class="list-item-left">
           <span style="font-size:22px">${d.emoji}</span>
           <div>
@@ -931,6 +974,11 @@ const Admin = (() => {
         <span class="list-edit">✏️</span>
       </div>
     `).join('');
+    initSortable('cuisine-list', (from, to) => {
+      reorderArr(state.cuisine, from, to);
+      save(KEYS.cuisine, state.cuisine);
+      showToast('Порядок сохранён');
+    });
   }
 
   function openCuisineModal(index) {
@@ -1264,7 +1312,8 @@ const Admin = (() => {
       return;
     }
     list.innerHTML = state.contacts.map((c, i) => `
-      <div class="list-item ${c.accent ? 'list-item-accent' : ''}" onclick="Admin.openContactModal(${i})">
+      <div class="list-item ${c.accent ? 'list-item-accent' : ''}" data-index="${i}" onclick="Admin.openContactModal(+this.dataset.index)">
+        <span class="drag-handle">⠿</span>
         <div class="list-item-left">
           <span style="font-size:22px">${c.emoji}</span>
           <div>
@@ -1275,6 +1324,11 @@ const Admin = (() => {
         <span class="list-edit">✏️</span>
       </div>
     `).join('');
+    initSortable('contacts-list', (from, to) => {
+      reorderArr(state.contacts, from, to);
+      save(KEYS.contacts, state.contacts);
+      showToast('Порядок сохранён');
+    });
   }
 
   function openContactModal(index) {
