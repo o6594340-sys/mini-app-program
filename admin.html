@@ -306,6 +306,29 @@
         </div>
       </div>
 
+      <div class="settings-block-title">🚀 Сплэш-экран</div>
+      <div class="form-group full">
+        <label class="splash-toggle-label">
+          <input type="checkbox" id="splash-enabled" onchange="Admin.toggleSplash()">
+          <span class="splash-toggle-track"><span class="splash-toggle-thumb"></span></span>
+          <span>Показывать сплэш при открытии приложения</span>
+        </label>
+      </div>
+      <div id="splash-options" class="hidden">
+        <div class="form-group full">
+          <label>Содержимое</label>
+          <div class="splash-content-grid" id="splash-content-grid"></div>
+        </div>
+        <div class="form-group full hidden" id="splash-slogan-group">
+          <label>Слоган</label>
+          <input type="text" id="splash-slogan" placeholder="Встречаемся в Стамбуле!" oninput="Admin.saveSplashSlogan()">
+        </div>
+        <div class="form-group full">
+          <label>Анимация — нажмите «Посмотреть» для предпросмотра</label>
+          <div class="splash-anim-grid" id="splash-anim-grid"></div>
+        </div>
+      </div>
+
       <div class="settings-block-title">✨ Анимации</div>
       <div class="form-group full">
         <label>Стиль переходов между экранами</label>

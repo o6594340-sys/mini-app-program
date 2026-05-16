@@ -526,6 +526,44 @@ textarea { resize: vertical; }
   font-size: 10px; color: #9CA3AF; margin-top: 6px;
 }
 
+/* ===== SPLASH SETTINGS ===== */
+.splash-toggle-label {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 500; cursor: pointer; user-select: none;
+}
+.splash-toggle-label input { display: none; }
+.splash-toggle-track {
+  width: 42px; height: 24px; border-radius: 100px;
+  background: var(--border); position: relative;
+  transition: background 0.2s; flex-shrink: 0;
+}
+.splash-toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+.splash-toggle-label input:checked ~ .splash-toggle-track { background: var(--accent); }
+.splash-toggle-label input:checked ~ .splash-toggle-track .splash-toggle-thumb { transform: translateX(18px); }
+.splash-content-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.splash-chip {
+  padding: 8px 16px; border-radius: 100px;
+  font-size: 12px; font-weight: 600;
+  border: 2px solid var(--border);
+  background: var(--surface); color: var(--text-2);
+  cursor: pointer; transition: all 0.15s;
+}
+.splash-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.splash-anim-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 8px; }
+.splash-preview-btn {
+  margin-top: 6px; padding: 5px 10px;
+  border-radius: 100px; border: none;
+  background: var(--bg-2, #f0ede8); color: var(--text-2);
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s; width: 100%;
+}
+.splash-preview-btn:hover { background: var(--border); }
+
 /* ===== FONT SCALE SELECTOR ===== */
 .font-scale-grid {
   display: grid;

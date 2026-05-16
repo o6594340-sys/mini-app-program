@@ -30,7 +30,20 @@ const Admin = (() => {
     bg:           'admin_bg',
     fontScale:    'admin_font_scale',
     dayTabStyle:  'admin_day_tab_style',
+    splash:       'admin_splash',
   };
+
+  const SPLASH_ANIMS = [
+    { id: 'fade',  icon: '◌',  name: 'Fade',  desc: 'Плавное появление' },
+    { id: 'rise',  icon: '↑',  name: 'Rise',  desc: 'Выезд снизу'       },
+    { id: 'pulse', icon: '◎',  name: 'Pulse', desc: 'Пульс и масштаб'   },
+  ];
+
+  const SPLASH_CONTENTS = [
+    { id: 'logo',   label: 'Только лого'     },
+    { id: 'title',  label: 'Лого + название' },
+    { id: 'slogan', label: 'Лого + слоган'   },
+  ];
 
   const DAY_TAB_STYLES = [
     { id: 'pills',     icon: '●●●', name: 'Пилюли',        desc: 'По умолчанию' },
@@ -347,9 +360,104 @@ const Admin = (() => {
     renderTypoGrid();
     renderFontScaleGrid();
     renderDayTabStyleGrid();
+    renderSplashSettings();
     renderBgPicker();
     updateBrandPreview();
     loadTabVisibility();
+  }
+
+  function _splashCfg() {
+    const raw = localStorage.getItem(KEYS.splash);
+    const def = { enabled: false, content: 'logo', slogan: '', animation: 'fade' };
+    if (!raw) return def;
+    try { return { ...def, ...JSON.parse(raw) }; } catch { return def; }
+  }
+
+  function _patchSplash(patch) {
+    localStorage.setItem(KEYS.splash, JSON.stringify({ ..._splashCfg(), ...patch }));
+  }
+
+  function renderSplashSettings() {
+    const cfg = _splashCfg();
+    const toggle = document.getElementById('splash-enabled');
+    if (toggle) toggle.checked = cfg.enabled;
+    const opts = document.getElementById('splash-options');
+    if (opts) opts.classList.toggle('hidden', !cfg.enabled);
+
+    const cGrid = document.getElementById('splash-content-grid');
+    if (cGrid) {
+      cGrid.innerHTML = SPLASH_CONTENTS.map(c =>
+        `<button class="splash-chip${c.id === cfg.content ? ' active' : ''}"
+           onclick="Admin.selectSplashContent('${c.id}')">${c.label}</button>`
+      ).join('');
+    }
+    const sg = document.getElementById('splash-slogan-group');
+    if (sg) sg.classList.toggle('hidden', cfg.content !== 'slogan');
+    const sf = document.getElementById('splash-slogan');
+    if (sf) sf.value = cfg.slogan || '';
+
+    const aGrid = document.getElementById('splash-anim-grid');
+    if (aGrid) {
+      aGrid.innerHTML = SPLASH_ANIMS.map(a =>
+        `<div class="scale-card${a.id === cfg.animation ? ' active' : ''}">
+           <span class="scale-card-letter" style="font-size:24px">${a.icon}</span>
+           <span style="font-size:12px;font-weight:700;color:var(--text)">${a.name}</span>
+           <span class="scale-card-desc">${a.desc}</span>
+           <button class="splash-preview-btn" onclick="Admin.selectSplashAnim('${a.id}');Admin.previewSplash()">▶ Посмотреть</button>
+           ${a.id === cfg.animation ? '<span class="motion-card-check">✓</span>' : ''}
+         </div>`
+      ).join('');
+    }
+  }
+
+  function toggleSplash() {
+    _patchSplash({ enabled: document.getElementById('splash-enabled').checked });
+    document.getElementById('splash-options').classList.toggle('hidden', !_splashCfg().enabled);
+  }
+
+  function selectSplashContent(id) {
+    _patchSplash({ content: id });
+    renderSplashSettings();
+  }
+
+  function selectSplashAnim(id) {
+    _patchSplash({ animation: id });
+    renderSplashSettings();
+  }
+
+  function saveSplashSlogan() {
+    _patchSplash({ slogan: document.getElementById('splash-slogan').value });
+  }
+
+  function previewSplash() {
+    const cfg = _splashCfg();
+    const e     = state.event;
+    const brand = e.brand || {};
+    const color = brand.color || '#C9353F';
+    const dark  = shadeHex(color, -40);
+    const bg    = `linear-gradient(135deg, ${color} 0%, ${dark} 100%)`;
+
+    const logoHtml = brand.logo
+      ? `<img class="splash-logo" src="${brand.logo}" alt="">`
+      : `<div class="splash-emoji">${brand.logoEmoji || '✦'}</div>`;
+    let textHtml = '';
+    if (cfg.content === 'title')  textHtml = `<div class="splash-title">${e.title || ''}</div>`;
+    if (cfg.content === 'slogan') textHtml = `<div class="splash-title">${cfg.slogan || e.title || ''}</div>`;
+
+    // inject splash styles if needed (admin.html doesn't load main.css)
+    if (!document.getElementById('splash-css')) {
+      const s = document.createElement('style');
+      s.id = 'splash-css';
+      s.textContent = `.splash-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center}.splash-inner{display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;padding:32px}.splash-logo{width:88px;height:88px;object-fit:contain;border-radius:20px;filter:drop-shadow(0 6px 24px rgba(0,0,0,.25))}.splash-emoji{font-size:80px;line-height:1}.splash-title{font-size:22px;font-weight:700;color:#fff;max-width:280px;line-height:1.3;text-shadow:0 2px 10px rgba(0,0,0,.2)}.splash-fade{animation:splFadeIn .5s ease forwards}.splash-fade.splash-exit{animation:splFadeOut .6s ease forwards}.splash-rise .splash-inner{animation:splRiseIn .55s cubic-bezier(.16,1,.3,1) forwards}.splash-rise.splash-exit{animation:splFadeOut .5s ease forwards}.splash-pulse{animation:splFadeIn .3s ease forwards}.splash-pulse .splash-inner{animation:splPulseIn .7s cubic-bezier(.34,1.56,.64,1) .1s both}.splash-pulse.splash-exit{animation:splFadeOut .55s ease forwards}@keyframes splFadeIn{from{opacity:0}to{opacity:1}}@keyframes splFadeOut{from{opacity:1}to{opacity:0}}@keyframes splRiseIn{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}@keyframes splPulseIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}`;
+      document.head.appendChild(s);
+    }
+
+    const el = document.createElement('div');
+    el.className = `splash-overlay splash-${cfg.animation}`;
+    el.style.background = bg;
+    el.innerHTML = `<div class="splash-inner">${logoHtml}${textHtml}</div>`;
+    document.body.appendChild(el);
+    setTimeout(() => { el.classList.add('splash-exit'); setTimeout(() => el.remove(), 700); }, 2000);
   }
 
   function renderDayTabStyleGrid() {
@@ -2280,6 +2388,7 @@ const CONTACTS = [
     saveAnnouncement, clearAnnouncement,
     saveSettings, updateBrandPreview, onBrandColorPicker, onBrandColorHex, onBrandColor2Picker, onBrandColor2Hex,
     selectFontScale, selectDayTabStyle,
+    toggleSplash, selectSplashContent, selectSplashAnim, saveSplashSlogan, previewSplash,
     selectTypography,
     selectGradient,
     selectCardStyle,

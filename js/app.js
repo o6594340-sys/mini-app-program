@@ -172,6 +172,39 @@ const App = (() => {
     if (style !== 'elevated') document.body.classList.add('cs-' + style);
   }
 
+  function showSplash() {
+    const raw = localStorage.getItem('admin_splash');
+    if (!raw) return;
+    let cfg;
+    try { cfg = JSON.parse(raw); } catch { return; }
+    if (!cfg.enabled) return;
+
+    const ev    = getEvent();
+    const brand = ev.brand || {};
+    const color = brand.color || '#C9353F';
+    const dark  = shadeColor(color, -40);
+    const bg    = `linear-gradient(135deg, ${color} 0%, ${dark} 100%)`;
+
+    const logoHtml = brand.logo
+      ? `<img class="splash-logo" src="${brand.logo}" alt="">`
+      : `<div class="splash-emoji">${brand.logoEmoji || '✦'}</div>`;
+
+    let textHtml = '';
+    if (cfg.content === 'title')  textHtml = `<div class="splash-title">${ev.title || ''}</div>`;
+    if (cfg.content === 'slogan') textHtml = `<div class="splash-title">${cfg.slogan || ev.title || ''}</div>`;
+
+    const el = document.createElement('div');
+    el.className = `splash-overlay splash-${cfg.animation || 'fade'}`;
+    el.style.background = bg;
+    el.innerHTML = `<div class="splash-inner">${logoHtml}${textHtml}</div>`;
+    document.body.appendChild(el);
+
+    setTimeout(() => {
+      el.classList.add('splash-exit');
+      setTimeout(() => el.remove(), 700);
+    }, 1700);
+  }
+
   function applyFontScale() {
     const scale = parseFloat(localStorage.getItem('admin_font_scale') || '1');
     document.body.style.zoom = scale;
@@ -222,6 +255,7 @@ const App = (() => {
   }
 
   function init() {
+    showSplash();
     applyTypography();
     applyBranding();
     applyGradient();
