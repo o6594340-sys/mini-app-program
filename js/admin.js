@@ -29,7 +29,14 @@ const Admin = (() => {
     tabs:         'admin_tabs',
     bg:           'admin_bg',
     fontScale:    'admin_font_scale',
+    dayTabStyle:  'admin_day_tab_style',
   };
+
+  const DAY_TAB_STYLES = [
+    { id: 'pills',     icon: '●●●', name: 'Пилюли',        desc: 'По умолчанию' },
+    { id: 'underline', icon: '─ ─', name: 'Подчёркивание', desc: 'Минимализм'  },
+    { id: 'bold',      icon: '1 2', name: 'Цифры',          desc: 'Крупный день' },
+  ];
 
   const FONT_SCALES = [
     { value: 0.9, label: 'А−', desc: 'Компактный' },
@@ -339,9 +346,29 @@ const Admin = (() => {
     renderGradientGrid();
     renderTypoGrid();
     renderFontScaleGrid();
+    renderDayTabStyleGrid();
     renderBgPicker();
     updateBrandPreview();
     loadTabVisibility();
+  }
+
+  function renderDayTabStyleGrid() {
+    const grid = document.getElementById('day-tab-style-grid');
+    if (!grid) return;
+    const saved = localStorage.getItem(KEYS.dayTabStyle) || 'pills';
+    grid.innerHTML = DAY_TAB_STYLES.map(s =>
+      `<div class="scale-card${s.id === saved ? ' active' : ''}" onclick="Admin.selectDayTabStyle('${s.id}')">
+        <span class="scale-card-letter" style="font-size:16px;letter-spacing:2px">${s.icon}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--text)">${s.name}</span>
+        <span class="scale-card-desc">${s.desc}</span>
+        ${s.id === saved ? '<span class="motion-card-check">✓</span>' : ''}
+      </div>`
+    ).join('');
+  }
+
+  function selectDayTabStyle(id) {
+    localStorage.setItem(KEYS.dayTabStyle, id);
+    renderDayTabStyleGrid();
   }
 
   function renderFontScaleGrid() {
@@ -2252,7 +2279,7 @@ const CONTACTS = [
     // announcement + settings
     saveAnnouncement, clearAnnouncement,
     saveSettings, updateBrandPreview, onBrandColorPicker, onBrandColorHex, onBrandColor2Picker, onBrandColor2Hex,
-    selectFontScale,
+    selectFontScale, selectDayTabStyle,
     selectTypography,
     selectGradient,
     selectCardStyle,

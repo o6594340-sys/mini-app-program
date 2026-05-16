@@ -371,11 +371,25 @@ const App = (() => {
     const container = document.getElementById('tab-program');
     const day = getDays()[state.programDay];
 
-    let tabs = '<div class="day-tabs">';
+    const dts = localStorage.getItem('admin_day_tab_style') || 'pills';
+    let tabs = `<div class="day-tabs day-tabs--${dts}">`;
     getDays().forEach((d, i) => {
-      const act = i === state.programDay ? 'active' : '';
-      tabs += `<button class="day-tab ${act}" style="${act ? 'background:' + d.color + ';color:white' : ''}"
-               onclick="App.selectProgramDay(${i})">${d.label}</button>`;
+      const act = i === state.programDay;
+      if (dts === 'underline') {
+        tabs += `<button class="day-tab${act ? ' active' : ''}" style="--day-col:${d.color}"
+                   onclick="App.selectProgramDay(${i})">${d.label}</button>`;
+      } else if (dts === 'bold') {
+        tabs += `<button class="day-tab${act ? ' active' : ''}"
+                   style="${act ? 'background:' + d.color + ';color:white' : '--day-col:' + d.color}"
+                   onclick="App.selectProgramDay(${i})">
+                   <span class="day-tab-num">${i + 1}</span>
+                   <span class="day-tab-lbl">${d.label}</span>
+                 </button>`;
+      } else {
+        tabs += `<button class="day-tab${act ? ' active' : ''}"
+                   style="${act ? 'background:' + d.color + ';color:white' : ''}"
+                   onclick="App.selectProgramDay(${i})">${d.label}</button>`;
+      }
     });
     tabs += '</div>';
 

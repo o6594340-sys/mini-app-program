@@ -407,6 +407,37 @@ body {
 }
 .day-tab.active { transform: scale(1.04); }
 
+/* — underline style — */
+.day-tabs--underline { gap: 0; border-bottom: 2px solid var(--border); padding-bottom: 0; }
+.day-tabs--underline .day-tab {
+  background: transparent;
+  border-radius: 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  color: var(--text-secondary);
+  padding: 10px 14px;
+}
+.day-tabs--underline .day-tab.active {
+  color: var(--day-col, var(--accent));
+  border-bottom-color: var(--day-col, var(--accent));
+  transform: none;
+  font-weight: 800;
+}
+
+/* — bold/numbered style — */
+.day-tabs--bold .day-tab {
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  min-height: 52px;
+  align-items: center;
+}
+.day-tabs--bold .day-tab.active { transform: scale(1.04); }
+.day-tab-num { font-size: 22px; font-weight: 900; line-height: 1; }
+.day-tab-lbl { font-size: 10px; opacity: 0.8; line-height: 1; }
+.day-tabs--bold .day-tab:not(.active) .day-tab-num { color: var(--day-col, var(--accent)); }
+
 /* ===== PROGRAM TAB ===== */
 .program-meta { font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; }
 .program-item {
