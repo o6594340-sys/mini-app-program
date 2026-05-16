@@ -736,6 +736,18 @@ textarea { resize: vertical; }
 .btn-small:hover { background: var(--bg); }
 .btn-small-danger { color: #e53935; border-color: #FFCDD2; }
 .btn-small-danger:hover { background: #FFF5F5; }
+
+/* ===== INPUT CLEAR BUTTON ===== */
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-wrap input { flex: 1; padding-right: 28px; }
+.input-clear {
+  position: absolute; right: 6px;
+  background: none; border: none;
+  color: #C4C9D4; font-size: 18px; line-height: 1;
+  cursor: pointer; padding: 0 2px;
+  display: flex; align-items: center;
+}
+.input-clear:hover { color: #e53935; }
 .ai-parse-row {
   display: flex; gap: 12px; align-items: center;
   margin: 16px 0;
