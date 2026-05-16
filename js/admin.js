@@ -487,14 +487,18 @@ const Admin = (() => {
   }
 
   function updateBrandPreview() {
-    const color   = document.getElementById('s-brand-color').value;
-    const logo    = document.getElementById('s-brand-logo').value.trim();
-    const title   = document.getElementById('s-title').value || 'Название события';
-    const bar     = document.getElementById('brand-preview-bar');
-    const titleEl = document.getElementById('brand-preview-title');
-    const logoEl  = document.getElementById('brand-preview-logo');
+    const color    = document.getElementById('s-brand-color').value;
+    const logo     = document.getElementById('s-brand-logo').value.trim();
+    const title    = document.getElementById('s-title').value    || 'Название события';
+    const dates    = document.getElementById('s-dates').value    || '';
+    const location = document.getElementById('s-location').value || '';
+    const bar      = document.getElementById('brand-preview-bar');
+    const titleEl  = document.getElementById('brand-preview-title');
+    const subEl    = document.getElementById('brand-preview-sub');
+    const logoEl   = document.getElementById('brand-preview-logo');
     if (bar)     bar.style.background = color;
     if (titleEl) titleEl.textContent  = title;
+    if (subEl)   subEl.textContent    = [dates, location].filter(Boolean).join(' · ');
     if (logoEl) {
       if (logo) { logoEl.src = logo; logoEl.classList.remove('hidden'); }
       else      { logoEl.classList.add('hidden'); }
