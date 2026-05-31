@@ -14,12 +14,16 @@
     <div class="auth-logo">🕌</div>
     <h1 class="auth-title">Панель организатора</h1>
     <p class="auth-sub">Стамбул 2026</p>
+    <input type="email" id="auth-email" class="auth-input hidden"
+      placeholder="Email организатора"
+      onkeydown="if(event.key==='Enter')Admin.login()">
     <input type="password" id="auth-input" class="auth-input"
       placeholder="Пароль администратора"
       onkeydown="if(event.key==='Enter')Admin.login()">
     <button class="auth-btn" onclick="Admin.login()">Войти</button>
     <div class="auth-error hidden" id="auth-error">Неверный пароль</div>
-    <a class="auth-link" href="index.html">← Перейти к сайту участника</a>
+    <a class="auth-link" href="dashboard.html">← Личный кабинет</a>
+    <a class="auth-link" href="index.html" style="margin-top:4px">← Перейти к сайту участника</a>
   </div>
 </div>
 
@@ -885,6 +889,10 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>

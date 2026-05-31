@@ -8,6 +8,8 @@
 const Admin = (() => {
 
   const PASSWORD = 'forum2024';
+  const _PID = new URLSearchParams(location.search).get('p'); // Firestore project ID
+
   const KEYS = {
     event:        'admin_event',
     days:         'admin_days',
@@ -127,7 +129,23 @@ const Admin = (() => {
   };
 
   /* ─── AUTH ────────────────────────────── */
-  function login() {
+  async function login() {
+    if (_PID && window.auth) {
+      // Firebase auth for SaaS projects
+      const email    = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-input').value;
+      const errEl    = document.getElementById('auth-error');
+      errEl.classList.add('hidden');
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        // auth state listener handles the rest
+      } catch(e) {
+        errEl.textContent = 'Неверный email или пароль';
+        errEl.classList.remove('hidden');
+      }
+      return;
+    }
+    // Legacy password auth (no ?p= param)
     const val = document.getElementById('auth-input').value;
     if (val === PASSWORD) {
       document.getElementById('auth-screen').classList.add('hidden');
@@ -141,9 +159,11 @@ const Admin = (() => {
   }
 
   function logout() {
+    if (_PID && window.auth) auth.signOut();
     document.getElementById('auth-screen').classList.remove('hidden');
     document.getElementById('admin-panel').classList.add('hidden');
-    document.getElementById('auth-input').value = '';
+    document.getElementById('auth-input').value  = '';
+    document.getElementById('auth-email').value  = '';
   }
 
   /* ─── LOAD DATA ───────────────────────── */
@@ -167,8 +187,46 @@ const Admin = (() => {
     try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : null; } catch { return null; }
   }
 
+  let _syncTimer = null;
+
   function save(key, data) {
     localStorage.setItem(key, JSON.stringify(data));
+    if (_PID && window.db) {
+      clearTimeout(_syncTimer);
+      _syncTimer = setTimeout(syncToFirestore, 2000);
+    }
+  }
+
+  async function syncToFirestore() {
+    if (!_PID || !window.db || !window.auth || !auth.currentUser) return;
+    const data = {};
+    Object.values(KEYS).forEach(lsKey => {
+      const k = lsKey.replace('admin_', '');
+      const v = localStorage.getItem(lsKey);
+      if (v) { try { data[k] = JSON.parse(v); } catch(e) {} }
+    });
+    const eventData = data.event || {};
+    try {
+      await db.collection('projects').doc(_PID).update({
+        data,
+        name:            eventData.title   || 'Без названия',
+        'meta.dates':    eventData.dates   || '',
+        'meta.location': eventData.location || '',
+        updated_at:      firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch(e) { console.error('Firestore sync error:', e); }
+  }
+
+  async function loadFromFirestore() {
+    if (!_PID || !window.db) return;
+    try {
+      const snap = await db.collection('projects').doc(_PID).get();
+      if (!snap.exists) return;
+      const data = snap.data().data || {};
+      Object.entries(data).forEach(([k, v]) => {
+        if (v !== undefined) localStorage.setItem('admin_' + k, JSON.stringify(v));
+      });
+    } catch(e) { console.error('Firestore load error:', e); }
   }
 
   /* ─── NAVIGATION ──────────────────────── */
@@ -2481,6 +2539,45 @@ const CONTACTS = [
     // modal
     openModal, closeModal,
   };
+
+  // Firebase Auth listener for SaaS projects (?p=PROJECT_ID)
+  if (_PID && window.auth) {
+    // Show email field and update UI for Firebase mode
+    document.addEventListener('DOMContentLoaded', () => {
+      const emailEl = document.getElementById('auth-email');
+      if (emailEl) emailEl.classList.remove('hidden');
+      const subEl = document.querySelector('.auth-sub');
+      if (subEl) subEl.textContent = 'Войдите в аккаунт организатора';
+    });
+
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        // Verify project ownership
+        try {
+          const snap = await db.collection('projects').doc(_PID).get();
+          if (!snap.exists || snap.data().ownerId !== user.uid) {
+            document.getElementById('auth-error').textContent = 'Нет доступа к этому проекту';
+            document.getElementById('auth-error').classList.remove('hidden');
+            auth.signOut();
+            return;
+          }
+          // Load Firestore data into localStorage
+          await loadFromFirestore();
+        } catch(e) { console.error('Project access check:', e); }
+
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('admin-panel').classList.remove('hidden');
+        // Update preview link to include project ID
+        const previewLink = document.querySelector('.preview-link');
+        if (previewLink) previewLink.href = 'index.html?p=' + _PID;
+        loadAll();
+        showSection('announcement', document.querySelector('.nav-btn'));
+      } else {
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('admin-panel').classList.add('hidden');
+      }
+    });
+  }
 
 })();
 

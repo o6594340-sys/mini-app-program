@@ -295,7 +295,20 @@ const App = (() => {
     } catch {}
   }
 
-  function init() {
+  async function init() {
+    // If ?p=PROJECT_ID: load data from Firestore into localStorage
+    const pid = new URLSearchParams(location.search).get('p');
+    if (pid && window.db) {
+      try {
+        const snap = await db.collection('projects').doc(pid).get();
+        if (snap.exists) {
+          const data = snap.data().data || {};
+          Object.entries(data).forEach(([k, v]) => {
+            if (v !== undefined) localStorage.setItem('admin_' + k, JSON.stringify(v));
+          });
+        }
+      } catch(e) { console.error('Firestore load:', e); }
+    }
     showSplash();
     applyTypography();
     applyBranding();
