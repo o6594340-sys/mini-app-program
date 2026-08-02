@@ -2061,10 +2061,17 @@ const Admin = (() => {
     let hotelFromCheckin = null;
     let hotelFromTransfer = null;
     let expectHotelNameNext = false;
+    let hotelDescLinesLeft = 0;
+    const hotelDescLines = [];
+    const headerLines = [];
     const HOTEL_NAME_RE = /(?:^|\s)(?:в|to)\s+(?:отел[ья]\s+)?([A-ZА-ЯЁ][A-Za-zА-Яа-яЁё0-9\s&',\-.]{1,60})$/;
+    const DAY_RE = /^(?:день|day)\s*(\d+)\s*[|—\-–:.]?\s*(.+)/i;
+    const TIME_RE = /^\d{1,2}[:.]\d{2}/;
     const DAY_COLORS = ['#C9353F', '#1D4ED8', '#047857', '#7C3AED', '#EA580C', '#6B7280'];
 
     for (const line of lines) {
+      if (!currentDay && headerLines.length < 8 && !DAY_RE.test(line)) headerLines.push(line);
+
       // "Отель" / "Hotel" as its own header line, with the actual name on the next line
       if (/^(?:отель|hotel)\s*:?\s*$/i.test(line)) {
         expectHotelNameNext = true;
@@ -2072,20 +2079,30 @@ const Admin = (() => {
       }
       if (expectHotelNameNext) {
         expectHotelNameNext = false;
-        if (!/^(?:день|day)\s*\d/i.test(line) && !/^\d{1,2}[:.]\d{2}/.test(line)) {
+        if (!DAY_RE.test(line) && !TIME_RE.test(line)) {
           hotel = { name: line.replace(/[.,;]+$/, ''), address: '' };
+          hotelDescLinesLeft = 2;
           continue;
         }
+      }
+      if (hotelDescLinesLeft > 0) {
+        if (!DAY_RE.test(line) && !TIME_RE.test(line) && !/^(?:отель|hotel)\s*[:\-–]/i.test(line)) {
+          hotelDescLines.push(line);
+          hotelDescLinesLeft--;
+          continue;
+        }
+        hotelDescLinesLeft = 0;
       }
 
       const hotelMatch = line.match(/^(?:отель|hotel)\s*[:\-–]\s*(.+)/i);
       if (hotelMatch) {
         const parts = hotelMatch[1].split(/[|—]/).map(s => s.trim()).filter(Boolean);
         hotel = { name: parts[0], address: parts[1] || '' };
+        hotelDescLinesLeft = 2;
         continue;
       }
 
-      const dayMatch = line.match(/^(?:день|day)\s*(\d+)\s*[|—\-–:.]?\s*(.+)/i);
+      const dayMatch = line.match(DAY_RE);
       if (dayMatch) {
         dayIndex++;
         currentDay = {
@@ -2135,7 +2152,30 @@ const Admin = (() => {
       const guessed = hotelFromCheckin || hotelFromTransfer;
       if (guessed) hotel = { name: guessed, address: '' };
     }
-    return { days, business, hotel };
+    if (hotel && hotelDescLines.length) {
+      const descText = hotelDescLines.join(' ');
+      hotel.desc = descText;
+      const bfMatch = descText.match(/завтрак[^.]*?в\s+ресторан[еа]?\s+([A-ZА-ЯЁ][\wа-яёA-Za-zё]{1,30})/i);
+      if (bfMatch) hotel.breakfast = `Ресторан ${bfMatch[1]}`;
+    }
+
+    // location: "в <Страна>" on a header line + a nearby short city line, e.g.
+    // "Корпоративная программа в ОАЭ" + "Дубай – Абу-Даби" -> "ОАЭ, Дубай"
+    const COUNTRY_RE = /(?:^|\s)в\s+([А-ЯЁ][А-Яа-яёA-Z]{1,30})\s*$/;
+    const SKIP_LOCATION_RE = /дат|участник|продолжительн|отель|hotel|^\d/i;
+    let country = null, city = null;
+    for (const line of headerLines) {
+      const cm = line.match(COUNTRY_RE);
+      if (cm && !country) country = cm[1].trim();
+    }
+    for (const line of headerLines) {
+      if (COUNTRY_RE.test(line) || SKIP_LOCATION_RE.test(line) || line.length > 60) continue;
+      city = line.split(/[–\-,]/)[0].trim();
+      break;
+    }
+    const location = [country, city].filter(Boolean).join(', ') || null;
+
+    return { days, business, hotel, location };
   }
 
   function parseProgram() {
@@ -2154,7 +2194,12 @@ const Admin = (() => {
       status.textContent = '';
     }
 
-    aiResult = { days: parsed.days, business: parsed.business, hotel: parsed.hotel };
+    aiResult = {
+      days: parsed.days,
+      business: parsed.business,
+      hotel: parsed.hotel,
+      event: parsed.location ? { location: parsed.location } : null,
+    };
     showAIPreview(aiResult);
   }
 
@@ -2252,11 +2297,18 @@ const Admin = (() => {
       });
       html += `</div>`;
     }
-    const hotelValue = (result.hotel?.name || '').replace(/"/g, '&quot;');
+    const hotelValue    = (result.hotel?.name || '').replace(/"/g, '&quot;');
+    const locationValue = (result.event?.location || '').replace(/"/g, '&quot;');
     html += `<div class="ai-preview-block">
       <strong>🏨 Отель</strong>
       <div class="form-group" style="margin-top:6px">
         <input type="text" id="ai-hotel-name" placeholder="Не распозналось автоматически — впишите название вручную" value="${hotelValue}">
+      </div>
+    </div>`;
+    html += `<div class="ai-preview-block">
+      <strong>📍 Город и страна</strong>
+      <div class="form-group" style="margin-top:6px">
+        <input type="text" id="ai-location" placeholder="Не распозналось автоматически — впишите вручную" value="${locationValue}">
       </div>
     </div>`;
 
@@ -2267,9 +2319,11 @@ const Admin = (() => {
   function applyAIResult() {
     if (!aiResult) return;
 
-    if (aiResult.event && Object.keys(aiResult.event).length) {
+    const locationInput = document.getElementById('ai-location');
+    const finalLocation = locationInput ? locationInput.value.trim() : (aiResult.event?.location || '');
+    if (finalLocation) {
       const cur = getStored(KEYS.event) || JSON.parse(JSON.stringify(EVENT));
-      const merged = { ...cur, ...aiResult.event };
+      const merged = { ...cur, location: finalLocation };
       save(KEYS.event, merged);
       state.event = merged;
     }
@@ -2286,7 +2340,9 @@ const Admin = (() => {
     if (finalHotelName) {
       const cur = getStored(KEYS.hotel) || JSON.parse(JSON.stringify(HOTEL));
       const patch = { name: finalHotelName };
-      if (aiResult.hotel?.address) patch.address = aiResult.hotel.address;
+      if (aiResult.hotel?.address)   patch.address   = aiResult.hotel.address;
+      if (aiResult.hotel?.desc)      patch.desc      = aiResult.hotel.desc;
+      if (aiResult.hotel?.breakfast) patch.breakfast = aiResult.hotel.breakfast;
       const merged = { ...cur, ...patch };
       save(KEYS.hotel, merged);
       state.hotel = merged;
