@@ -16,6 +16,7 @@ const TEMPLATES = {
       flag:  '🇨🇳',
       color: '#C9353F',
       city:  'Пекин',
+      countryForms: ['китай', 'китае', 'китая', 'китаю', 'china'],
       desc:  'Запретный город, Великая стена, утка по-пекински',
     },
     event: {
@@ -295,6 +296,7 @@ const TEMPLATES = {
       flag:  '🇯🇵',
       color: '#BC002D',
       city:  'Токио',
+      countryForms: ['япония', 'японии', 'японию', 'japan'],
       desc:  'Сенсо-дзи, рамен, технологии и традиции',
     },
     event: {
@@ -562,6 +564,7 @@ const TEMPLATES = {
       flag:  '🇦🇪',
       color: '#006400',
       city:  'Дубай',
+      countryForms: ['оаэ', 'эмираты', 'эмиратов', 'uae'],
       desc:  'Бурдж-Халифа, пустынное сафари, золотой сук',
     },
     event: {
@@ -809,6 +812,7 @@ const TEMPLATES = {
       flag:  '🇹🇭',
       color: '#A51C30',
       city:  'Бангкок',
+      countryForms: ['таиланд', 'таиланде', 'тайланд', 'thailand'],
       desc:  'Храмы, плавучие рынки, тайский массаж и уличная еда',
     },
     event: {
@@ -1047,6 +1051,7 @@ const TEMPLATES = {
       flag:  '🇹🇷',
       color: '#C8102E',
       city:  'Стамбул',
+      countryForms: ['турция', 'турции', 'турцию', 'turkey'],
       desc:  'Айя-София, Босфор, Гранд Базар, кебаб и пахлава',
     },
     event: {

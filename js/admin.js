@@ -2230,20 +2230,31 @@ const Admin = (() => {
     }
     const location = [country, city].filter(Boolean).join(', ') || null;
 
-    // match cuisine/history from an existing country template, if the detected city
-    // corresponds to one we already have curated content for (Пекин/Токио/Дубай/Бангкок/Стамбул)
+    // match cuisine/history from an existing country template — exact city match first
+    // (Пекин/Токио/Дубай/Бангкок/Стамбул), falling back to same-country match if the
+    // brief is for a different city in a country we already have curated content for
+    // (e.g. Шанхай -> нет точного шаблона, но страна та же, что у Пекина -> берём его)
     let templateMatch = null;
+    let templateIsExactCity = false;
     if (city) {
       const cityLow = city.toLowerCase();
       templateMatch = Object.entries(TEMPLATES).find(([, tpl]) =>
         tpl.meta?.city && tpl.meta.city.toLowerCase() === cityLow
       );
+      if (templateMatch) templateIsExactCity = true;
+    }
+    if (!templateMatch && country) {
+      const countryLow = country.toLowerCase();
+      templateMatch = Object.entries(TEMPLATES).find(([, tpl]) =>
+        (tpl.meta?.countryForms || []).some(f => countryLow.includes(f) || f.includes(countryLow))
+      );
     }
     const cuisine = templateMatch ? templateMatch[1].cuisine : null;
     const history = templateMatch ? templateMatch[1].history : null;
     const templateName = templateMatch ? templateMatch[1].meta.name : null;
+    const templateIsApprox = !!templateMatch && !templateIsExactCity;
 
-    return { days, business, hotel, location, restaurants, sights, cuisine, history, templateName };
+    return { days, business, hotel, location, restaurants, sights, cuisine, history, templateName, templateIsApprox };
   }
 
   function parseProgram() {
@@ -2272,6 +2283,7 @@ const Admin = (() => {
       cuisine: parsed.cuisine,
       history: parsed.history,
       templateName: parsed.templateName,
+      templateIsApprox: parsed.templateIsApprox,
     };
     showAIPreview(aiResult);
   }
@@ -2398,7 +2410,10 @@ const Admin = (() => {
       html += `</div>`;
     }
     if (result.templateName) {
-      html += `<div class="ai-preview-block"><strong>🍜 Кухня и 📜 История</strong><div class="ai-preview-item">Подставлены готовые разделы для «${result.templateName}»</div></div>`;
+      const approxNote = result.templateIsApprox
+        ? ` — точного шаблона по городу нет, взято как ближайшее приближение по стране`
+        : '';
+      html += `<div class="ai-preview-block"><strong>🍜 Кухня и 📜 История</strong><div class="ai-preview-item">Подставлены готовые разделы для «${result.templateName}»${approxNote}</div></div>`;
     }
 
     document.getElementById('ai-result-preview').innerHTML = html;
