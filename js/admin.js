@@ -2443,11 +2443,18 @@ const Admin = (() => {
     const finalHotelName = hotelNameInput ? hotelNameInput.value.trim() : (aiResult.hotel?.name || '');
     if (finalHotelName) {
       const cur = getStored(KEYS.hotel) || JSON.parse(JSON.stringify(HOTEL));
+      const isNewHotel = (cur.name || '').trim().toLowerCase() !== finalHotelName.trim().toLowerCase();
+      // switching to a genuinely different hotel: drop the old hotel's specific details
+      // (photos, stars, amenities, tips, phone, times) instead of carrying them over —
+      // they belong to the previous hotel, not this one
+      const base = isNewHotel
+        ? { name: '', nameCn: '', stars: 0, image: '', gallery: [], address: '', addressCn: '', metro: '', phone: '', checkin: '', checkout: '', breakfast: '', desc: '', amenities: [], tips: [] }
+        : cur;
       const patch = { name: finalHotelName };
       if (aiResult.hotel?.address)   patch.address   = aiResult.hotel.address;
       if (aiResult.hotel?.desc)      patch.desc      = aiResult.hotel.desc;
       if (aiResult.hotel?.breakfast) patch.breakfast = aiResult.hotel.breakfast;
-      const merged = { ...cur, ...patch };
+      const merged = { ...base, ...patch };
       save(KEYS.hotel, merged);
       state.hotel = merged;
 
