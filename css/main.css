@@ -574,6 +574,7 @@ body {
   margin-bottom: 16px;
 }
 .sight-img  { width: 100%; height: 190px; object-fit: cover; display: block; }
+.img-placeholder { display: flex; align-items: center; justify-content: center; font-size: 48px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); }
 .sight-body { padding: 14px; }
 .sight-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 .tag {

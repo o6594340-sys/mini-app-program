@@ -2064,13 +2064,36 @@ const Admin = (() => {
     let hotelDescLinesLeft = 0;
     const hotelDescLines = [];
     const headerLines = [];
-    const HOTEL_NAME_RE = /(?:^|\s)(?:в|to)\s+(?:отел[ья]\s+)?([A-ZА-ЯЁ][A-Za-zА-Яа-яЁё0-9\s&',\-.]{1,60})$/;
+    const restaurants = [];
+    const restaurantNames = new Set();
+    const sights = [];
+    const sightNames = new Set();
+    let expectBulletSights = false;
+    const HOTEL_NAME_RE = /(?:^|\s)(?:в|to)\s+(?:отел[ья]\s+)?(\p{Lu}[\p{L}0-9\s&',\-.]{1,60})$/u;
+    const RESTAURANT_NAME_RE = /в\s+ресторан[еы]?\s+(\p{Lu}[\p{L}0-9&'\-]+(?:\s+\p{Lu}[\p{L}0-9&'\-]+){0,4})/iu;
+    const BULLET_RE = /^[-–—•]\s*(.+)/;
+    const MEAL_EMOJI = { завтрак: '🍳', обед: '🍽', ужин: '🌙', банкет: '🥂' };
     const DAY_RE = /^(?:день|day)\s*(\d+)\s*[|—\-–:.]?\s*(.+)/i;
     const TIME_RE = /^\d{1,2}[:.]\d{2}/;
     const DAY_COLORS = ['#C9353F', '#1D4ED8', '#047857', '#7C3AED', '#EA580C', '#6B7280'];
 
     for (const line of lines) {
       if (!currentDay && headerLines.length < 8 && !DAY_RE.test(line)) headerLines.push(line);
+
+      // bullet sub-items under an excursion line ending in ":" -> each becomes a sight
+      if (expectBulletSights) {
+        const bm = line.match(BULLET_RE);
+        if (bm) {
+          const t = bm[1].trim().replace(/[.,;]+$/, '');
+          const key = t.toLowerCase();
+          if (t && !sightNames.has(key)) {
+            sightNames.add(key);
+            sights.push({ title: t, day: currentDay ? currentDay.label : '' });
+          }
+          continue;
+        }
+        expectBulletSights = false;
+      }
 
       // "Отель" / "Hotel" as its own header line, with the actual name on the next line
       if (/^(?:отель|hotel)\s*:?\s*$/i.test(line)) {
@@ -2132,7 +2155,7 @@ const Admin = (() => {
           if (/завтрак|обед|ужин|банкет/.test(low))         type = 'meal';
           else if (/гала|gala/.test(low))                    type = 'gala';
           else if (/трансфер|автобус|вылет|прилёт|аэропорт/.test(low)) type = 'transfer';
-          else if (/экскурс/.test(low))                      type = 'excursion';
+          else if (/экскурс|посещение|осмотр/.test(low))     type = 'excursion';
           else if (/отель|check.in|заселен|заезд|выселен/.test(low))   type = 'hotel';
 
           // try to pick up the hotel name from a check-in or transfer line, e.g.
@@ -2142,6 +2165,38 @@ const Admin = (() => {
             const candidate = hotelNameMatch[1].trim().replace(/[.,;]+$/, '');
             if (type === 'hotel')         hotelFromCheckin  = hotelFromCheckin  || candidate;
             else if (type === 'transfer') hotelFromTransfer = hotelFromTransfer || candidate;
+          }
+
+          // meal activities that name a restaurant -> Рестораны
+          if (type === 'meal') {
+            const rm = desc.match(RESTAURANT_NAME_RE);
+            if (rm) {
+              const name = rm[1].trim().replace(/[.,;]+$/, '');
+              const key = name.toLowerCase();
+              if (!restaurantNames.has(key)) {
+                restaurantNames.add(key);
+                const mealWord = Object.keys(MEAL_EMOJI).find(w => low.includes(w));
+                restaurants.push({
+                  title: name,
+                  emoji: mealWord ? MEAL_EMOJI[mealWord] : '🍽',
+                  note: `${currentDay.label} · ${mealWord || ''}`.trim(),
+                });
+              }
+            }
+          }
+
+          // excursion activities -> Места; a line ending in ":" introduces a bullet list of places
+          if (type === 'excursion') {
+            if (/:\s*$/.test(desc)) {
+              expectBulletSights = true;
+            } else {
+              const t = desc.replace(/[.,;]+$/, '');
+              const key = t.toLowerCase();
+              if (!sightNames.has(key)) {
+                sightNames.add(key);
+                sights.push({ title: t, day: currentDay.label });
+              }
+            }
           }
 
           currentDay.activities.push({ time, title: desc, location: '', type, note: null });
@@ -2175,7 +2230,20 @@ const Admin = (() => {
     }
     const location = [country, city].filter(Boolean).join(', ') || null;
 
-    return { days, business, hotel, location };
+    // match cuisine/history from an existing country template, if the detected city
+    // corresponds to one we already have curated content for (Пекин/Токио/Дубай/Бангкок/Стамбул)
+    let templateMatch = null;
+    if (city) {
+      const cityLow = city.toLowerCase();
+      templateMatch = Object.entries(TEMPLATES).find(([, tpl]) =>
+        tpl.meta?.city && tpl.meta.city.toLowerCase() === cityLow
+      );
+    }
+    const cuisine = templateMatch ? templateMatch[1].cuisine : null;
+    const history = templateMatch ? templateMatch[1].history : null;
+    const templateName = templateMatch ? templateMatch[1].meta.name : null;
+
+    return { days, business, hotel, location, restaurants, sights, cuisine, history, templateName };
   }
 
   function parseProgram() {
@@ -2199,6 +2267,11 @@ const Admin = (() => {
       business: parsed.business,
       hotel: parsed.hotel,
       event: parsed.location ? { location: parsed.location } : null,
+      restaurants: parsed.restaurants,
+      sights: parsed.sights,
+      cuisine: parsed.cuisine,
+      history: parsed.history,
+      templateName: parsed.templateName,
     };
     showAIPreview(aiResult);
   }
@@ -2276,9 +2349,11 @@ const Admin = (() => {
     const daysCount  = (result.days || []).length;
     const actsCount  = (result.days || []).reduce((n, d) => n + (d.activities || []).length, 0);
     const bizCount   = (result.business || []).length;
+    const restCount  = (result.restaurants || []).length;
+    const sightCount = (result.sights || []).length;
 
     document.getElementById('ai-result-summary').textContent =
-      `Найдено: ${daysCount} дн., ${actsCount} активностей, ${bizCount} деловых сессий`;
+      `Найдено: ${daysCount} дн., ${actsCount} активностей, ${bizCount} деловых сессий, ${restCount} ресторанов, ${sightCount} мест`;
 
     let html = '';
     if (result.event?.title) {
@@ -2311,6 +2386,20 @@ const Admin = (() => {
         <input type="text" id="ai-location" placeholder="Не распозналось автоматически — впишите вручную" value="${locationValue}">
       </div>
     </div>`;
+
+    if (restCount) {
+      html += `<div class="ai-preview-block"><strong>🍽 Рестораны из программы (${restCount})</strong>`;
+      result.restaurants.forEach(r => { html += `<div class="ai-preview-item">${r.emoji} ${r.title} · ${r.note}</div>`; });
+      html += `</div>`;
+    }
+    if (sightCount) {
+      html += `<div class="ai-preview-block"><strong>🏛 Места из программы (${sightCount})</strong>`;
+      result.sights.forEach(s => { html += `<div class="ai-preview-item">📍 ${s.title}${s.day ? ' · ' + s.day : ''}</div>`; });
+      html += `</div>`;
+    }
+    if (result.templateName) {
+      html += `<div class="ai-preview-block"><strong>🍜 Кухня и 📜 История</strong><div class="ai-preview-item">Подставлены готовые разделы для «${result.templateName}»</div></div>`;
+    }
 
     document.getElementById('ai-result-preview').innerHTML = html;
     document.getElementById('ai-result').classList.remove('hidden');
@@ -2352,6 +2441,31 @@ const Admin = (() => {
       const mergedEvent = { ...curEvent, hotel: { ...curEvent.hotel, name: merged.name, address: merged.address || curEvent.hotel?.address } };
       save(KEYS.event, mergedEvent);
       state.event = mergedEvent;
+    }
+
+    if ((aiResult.restaurants || []).length) {
+      const restaurants = aiResult.restaurants.map((r, i) => ({
+        id: `imp-r${i + 1}`, type: 'program', title: r.title, emoji: r.emoji || '🍽',
+        cuisine: '', price: '', address: '', metro: '', hours: '', note: r.note || '', image: '', desc: '',
+      }));
+      save(KEYS.restaurants, restaurants);
+      state.restaurants = restaurants;
+    }
+    if ((aiResult.sights || []).length) {
+      const sights = aiResult.sights.map((s, i) => ({
+        id: `imp-s${i + 1}`, title: s.title, sub: s.day || '', emoji: '📍', image: '',
+        distance: '', hours: '', price: '', tags: [], desc: '', tip: '',
+      }));
+      save(KEYS.sights, sights);
+      state.sights = sights;
+    }
+    if (aiResult.cuisine) {
+      save(KEYS.cuisine, aiResult.cuisine);
+      state.cuisine = aiResult.cuisine;
+    }
+    if (aiResult.history) {
+      save(KEYS.history, aiResult.history);
+      state.history = aiResult.history;
     }
 
     aiResult = null;

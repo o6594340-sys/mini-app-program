@@ -724,12 +724,12 @@ const App = (() => {
   function renderSights() {
     const container = document.getElementById('tab-sights');
     let html = `<div class="section-pad">`;
-    html += `<div class="section-title">Достопримечательности Пекина</div>`;
+    html += `<div class="section-title">Достопримечательности</div>`;
 
     getSights().forEach(s => {
       html += `
         <div class="sight-card">
-          <img class="sight-img" src="${s.image}" alt="${s.title}">
+          ${s.image ? `<img class="sight-img" src="${s.image}" alt="${s.title}">` : `<div class="sight-img img-placeholder">${s.emoji || '📍'}</div>`}
           <div class="sight-body">
             <div class="sight-tags">${s.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
             <h3 class="sight-title">${s.emoji} ${s.title}</h3>
@@ -774,7 +774,7 @@ const App = (() => {
       : '';
     return `
       <div class="rest-card">
-        <img class="rest-img" src="${r.image}" alt="${r.title}">
+        ${r.image ? `<img class="rest-img" src="${r.image}" alt="${r.title}">` : `<div class="rest-img img-placeholder">${r.emoji || '🍽'}</div>`}
         <div class="rest-body">
           <div class="rest-header">
             <div>
