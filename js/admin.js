@@ -243,6 +243,7 @@ const Admin = (() => {
     if (btn) btn.classList.add('active');
     state.section = name;
 
+    if (name === 'settings')    loadSettingsForm();
     if (name === 'program')     renderProgramSection();
     if (name === 'templates')   renderTemplatesSection();
     if (name === 'business')    renderBusinessSection();
@@ -330,13 +331,16 @@ const Admin = (() => {
     const cuisine     = tpl.cuisine     || JSON.parse(JSON.stringify(CUISINE));
     const history     = tpl.history     || JSON.parse(JSON.stringify(HISTORY));
 
-    // patch event: update location + brand color, keep title/dates/wifi/organizer/emergency/logo
+    // patch event: update location + brand color + hotel summary (kept in sync with the
+    // full HOTEL record below — "Настройки события" shows its own short name/phone fields)
+    // keep title/dates/wifi/organizer/emergency/logo
     const currentEvent = getStored(KEYS.event) || JSON.parse(JSON.stringify(EVENT));
     const patchedEvent = {
       ...currentEvent,
       location: tpl.event.location,
       subtitle: tpl.event.subtitle,
       brand:    { ...tpl.event.brand, logo: currentEvent.brand?.logo || tpl.event.brand.logo },
+      hotel:    { ...currentEvent.hotel, name: hotel.name, address: hotel.address, phone: hotel.phone, checkin: hotel.checkin, checkout: hotel.checkout },
     };
 
     save(KEYS.event,       patchedEvent);
@@ -2249,6 +2253,12 @@ const Admin = (() => {
       const merged = { ...cur, ...patch };
       save(KEYS.hotel, merged);
       state.hotel = merged;
+
+      // keep "Настройки события" hotel summary (separate field, shown in a different section) in sync
+      const curEvent = getStored(KEYS.event) || JSON.parse(JSON.stringify(EVENT));
+      const mergedEvent = { ...curEvent, hotel: { ...curEvent.hotel, name: merged.name, address: merged.address || curEvent.hotel?.address } };
+      save(KEYS.event, mergedEvent);
+      state.event = mergedEvent;
     }
 
     aiResult = null;
