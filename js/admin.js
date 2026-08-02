@@ -2252,9 +2252,13 @@ const Admin = (() => {
       });
       html += `</div>`;
     }
-    if (result.hotel?.name) {
-      html += `<div class="ai-preview-block"><strong>🏨 Отель:</strong> ${result.hotel.name}</div>`;
-    }
+    const hotelValue = (result.hotel?.name || '').replace(/"/g, '&quot;');
+    html += `<div class="ai-preview-block">
+      <strong>🏨 Отель</strong>
+      <div class="form-group" style="margin-top:6px">
+        <input type="text" id="ai-hotel-name" placeholder="Не распозналось автоматически — впишите название вручную" value="${hotelValue}">
+      </div>
+    </div>`;
 
     document.getElementById('ai-result-preview').innerHTML = html;
     document.getElementById('ai-result').classList.remove('hidden');
@@ -2277,10 +2281,12 @@ const Admin = (() => {
       save(KEYS.business, aiResult.business);
       state.business = aiResult.business;
     }
-    if (aiResult.hotel?.name) {
+    const hotelNameInput = document.getElementById('ai-hotel-name');
+    const finalHotelName = hotelNameInput ? hotelNameInput.value.trim() : (aiResult.hotel?.name || '');
+    if (finalHotelName) {
       const cur = getStored(KEYS.hotel) || JSON.parse(JSON.stringify(HOTEL));
-      const patch = { name: aiResult.hotel.name };
-      if (aiResult.hotel.address) patch.address = aiResult.hotel.address;
+      const patch = { name: finalHotelName };
+      if (aiResult.hotel?.address) patch.address = aiResult.hotel.address;
       const merged = { ...cur, ...patch };
       save(KEYS.hotel, merged);
       state.hotel = merged;
