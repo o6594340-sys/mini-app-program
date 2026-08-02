@@ -2047,9 +2047,17 @@ const Admin = (() => {
     let currentDay = null;
     let dayIndex = 0;
     const business = [];
+    let hotel = null;
     const DAY_COLORS = ['#C9353F', '#1D4ED8', '#047857', '#7C3AED', '#EA580C', '#6B7280'];
 
     for (const line of lines) {
+      const hotelMatch = line.match(/^(?:отель|hotel)\s*[:\-–]\s*(.+)/i);
+      if (hotelMatch) {
+        const parts = hotelMatch[1].split(/[|—]/).map(s => s.trim()).filter(Boolean);
+        hotel = { name: parts[0], address: parts[1] || '' };
+        continue;
+      }
+
       const dayMatch = line.match(/^(?:день|day)\s*(\d+)\s*[|—\-–:.]?\s*(.+)/i);
       if (dayMatch) {
         dayIndex++;
@@ -2086,7 +2094,7 @@ const Admin = (() => {
         }
       }
     }
-    return { days, business };
+    return { days, business, hotel };
   }
 
   function parseProgram() {
@@ -2100,7 +2108,7 @@ const Admin = (() => {
       return;
     }
 
-    aiResult = { days: parsed.days, business: parsed.business };
+    aiResult = { days: parsed.days, business: parsed.business, hotel: parsed.hotel };
     status.textContent = '';
     showAIPreview(aiResult);
   }
@@ -2226,7 +2234,9 @@ const Admin = (() => {
     }
     if (aiResult.hotel?.name) {
       const cur = getStored(KEYS.hotel) || JSON.parse(JSON.stringify(HOTEL));
-      const merged = { ...cur, ...aiResult.hotel };
+      const patch = { name: aiResult.hotel.name };
+      if (aiResult.hotel.address) patch.address = aiResult.hotel.address;
+      const merged = { ...cur, ...patch };
       save(KEYS.hotel, merged);
       state.hotel = merged;
     }
