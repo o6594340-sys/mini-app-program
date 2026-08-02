@@ -190,7 +190,13 @@ const Admin = (() => {
   let _syncTimer = null;
 
   function save(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+      showToast('❌ Не удалось сохранить — превышен лимит хранилища браузера (обычно из-за больших фото). Используйте ссылки на фото вместо загрузки файлов.');
+      console.error('save() failed:', key, e);
+      return;
+    }
     if (_PID && window.db) {
       clearTimeout(_syncTimer);
       _syncTimer = setTimeout(syncToFirestore, 2000);
@@ -2103,13 +2109,17 @@ const Admin = (() => {
     if (!text) { showToast('Вставьте текст программы'); return; }
 
     const parsed = parseImportText(text);
-    if (!parsed.days.length) {
-      status.textContent = '❌ Дни не найдены. Используйте формат: «День 1 | 18 ноября»';
+    if (!parsed.days.length && !parsed.hotel) {
+      status.textContent = '❌ Ничего не найдено. Используйте формат: «День 1 | 18 ноября» и/или «Отель: Название | Адрес»';
       return;
+    }
+    if (!parsed.days.length) {
+      status.textContent = '⚠️ Дни не найдены (распознан только отель) — используйте формат «День 1 | 18 ноября», если нужно обновить и программу';
+    } else {
+      status.textContent = '';
     }
 
     aiResult = { days: parsed.days, business: parsed.business, hotel: parsed.hotel };
-    status.textContent = '';
     showAIPreview(aiResult);
   }
 
