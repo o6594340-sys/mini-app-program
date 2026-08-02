@@ -2058,6 +2058,9 @@ const Admin = (() => {
     let dayIndex = 0;
     const business = [];
     let hotel = null;
+    let hotelFromCheckin = null;
+    let hotelFromTransfer = null;
+    const HOTEL_NAME_RE = /(?:^|\s)(?:в|to)\s+(?:отел[ья]\s+)?([A-ZА-ЯЁ][A-Za-zА-Яа-яЁё0-9\s&'\-.]{1,40})$/;
     const DAY_COLORS = ['#C9353F', '#1D4ED8', '#047857', '#7C3AED', '#EA580C', '#6B7280'];
 
     for (const line of lines) {
@@ -2100,9 +2103,23 @@ const Admin = (() => {
           else if (/трансфер|автобус|вылет|прилёт|аэропорт/.test(low)) type = 'transfer';
           else if (/экскурс/.test(low))                      type = 'excursion';
           else if (/отель|check.in|заселен|заезд|выселен/.test(low))   type = 'hotel';
+
+          // try to pick up the hotel name from a check-in or transfer line, e.g.
+          // "Заселение в Ritz Carlton" / "Трансфер в отель Atlantis The Palm"
+          const hotelNameMatch = desc.match(HOTEL_NAME_RE);
+          if (hotelNameMatch) {
+            const candidate = hotelNameMatch[1].trim().replace(/[.,;]+$/, '');
+            if (type === 'hotel')         hotelFromCheckin  = hotelFromCheckin  || candidate;
+            else if (type === 'transfer') hotelFromTransfer = hotelFromTransfer || candidate;
+          }
+
           currentDay.activities.push({ time, title: desc, location: '', type, note: null });
         }
       }
+    }
+    if (!hotel) {
+      const guessed = hotelFromCheckin || hotelFromTransfer;
+      if (guessed) hotel = { name: guessed, address: '' };
     }
     return { days, business, hotel };
   }
