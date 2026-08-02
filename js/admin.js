@@ -2070,15 +2070,17 @@ const Admin = (() => {
     const sightNames = new Set();
     let expectBulletSights = false;
     const HOTEL_NAME_RE = /(?:^|\s)(?:в|to)\s+(?:отел[ья]\s+)?(\p{Lu}[\p{L}0-9\s&',\-.]{1,60})$/u;
-    const RESTAURANT_NAME_RE = /в\s+ресторан[еы]?\s+(\p{Lu}[\p{L}0-9&'\-]+(?:\s+\p{Lu}[\p{L}0-9&'\-]+){0,4})/iu;
+    const RESTAURANT_NAME_RE = /в\s+ресторан[еы]?\s+(\p{Lu}[\p{L}0-9&'\-]+(?:\s+(?:\p{Lu}[\p{L}0-9&'\-]+|el|al|de|of|on|la|the|and)){0,5})/u;
     const BULLET_RE = /^[-–—•]\s*(.+)/;
     const MEAL_EMOJI = { завтрак: '🍳', обед: '🍽', ужин: '🌙', банкет: '🥂' };
     const DAY_RE = /^(?:день|day)\s*(\d+)\s*[|—\-–:.]?\s*(.+)/i;
     const TIME_RE = /^\d{1,2}[:.]\d{2}/;
     const DAY_COLORS = ['#C9353F', '#1D4ED8', '#047857', '#7C3AED', '#EA580C', '#6B7280'];
 
+    let hitAccommodationSection = false;
     for (const line of lines) {
-      if (!currentDay && headerLines.length < 8 && !DAY_RE.test(line)) headerLines.push(line);
+      if (!currentDay && !hitAccommodationSection && headerLines.length < 8 && !DAY_RE.test(line)) headerLines.push(line);
+      if (/^(?:отель|hotel|размещение|проживание|гостиница)/i.test(line)) hitAccommodationSection = true;
 
       // bullet sub-items under an excursion line ending in ":" -> each becomes a sight
       if (expectBulletSights) {
@@ -2096,7 +2098,7 @@ const Admin = (() => {
       }
 
       // "Отель" / "Hotel" as its own header line, with the actual name on the next line
-      if (/^(?:отель|hotel)\s*:?\s*$/i.test(line)) {
+      if (/^(?:отель|hotel|размещение|проживание|гостиница)\s*:?\s*$/i.test(line)) {
         expectHotelNameNext = true;
         continue;
       }
@@ -2109,7 +2111,7 @@ const Admin = (() => {
         }
       }
       if (hotelDescLinesLeft > 0) {
-        if (!DAY_RE.test(line) && !TIME_RE.test(line) && !/^(?:отель|hotel)\s*[:\-–]/i.test(line)) {
+        if (!DAY_RE.test(line) && !TIME_RE.test(line) && !/^(?:отель|hotel|размещение|проживание|гостиница)\s*[:\-–]/i.test(line)) {
           hotelDescLines.push(line);
           hotelDescLinesLeft--;
           continue;
@@ -2117,7 +2119,7 @@ const Admin = (() => {
         hotelDescLinesLeft = 0;
       }
 
-      const hotelMatch = line.match(/^(?:отель|hotel)\s*[:\-–]\s*(.+)/i);
+      const hotelMatch = line.match(/^(?:отель|hotel|размещение|проживание|гостиница)\s*[:\-–]\s*(.+)/i);
       if (hotelMatch) {
         const parts = hotelMatch[1].split(/[|—]/).map(s => s.trim()).filter(Boolean);
         hotel = { name: parts[0], address: parts[1] || '' };
@@ -2156,7 +2158,7 @@ const Admin = (() => {
           else if (/гала|gala/.test(low))                    type = 'gala';
           else if (/трансфер|автобус|вылет|прилёт|аэропорт/.test(low)) type = 'transfer';
           else if (/экскурс|посещение|осмотр/.test(low))     type = 'excursion';
-          else if (/отель|check.in|заселен|заезд|выселен/.test(low))   type = 'hotel';
+          else if (/отель|гостиниц|check.in|заселен|заезд|выселен/.test(low)) type = 'hotel';
 
           // try to pick up the hotel name from a check-in or transfer line, e.g.
           // "Заселение в Ritz Carlton" / "Трансфер в отель Atlantis The Palm"
@@ -2217,14 +2219,14 @@ const Admin = (() => {
     // location: "в <Страна>" on a header line + a nearby short city line, e.g.
     // "Корпоративная программа в ОАЭ" + "Дубай – Абу-Даби" -> "ОАЭ, Дубай"
     const COUNTRY_RE = /(?:^|\s)в\s+([А-ЯЁ][А-Яа-яёA-Z]{1,30})\s*$/;
-    const SKIP_LOCATION_RE = /дат|участник|продолжительн|отель|hotel|^\d/i;
+    const SKIP_LOCATION_RE = /:|дат|участник|продолжительн|формат|отель|hotel|размещение|проживание|гостиница|^\d/i;
     let country = null, city = null;
     for (const line of headerLines) {
       const cm = line.match(COUNTRY_RE);
       if (cm && !country) country = cm[1].trim();
     }
     for (const line of headerLines) {
-      if (COUNTRY_RE.test(line) || SKIP_LOCATION_RE.test(line) || line.length > 60) continue;
+      if (COUNTRY_RE.test(line) || SKIP_LOCATION_RE.test(line) || line.length > 40) continue;
       city = line.split(/[–\-,]/)[0].trim();
       break;
     }
