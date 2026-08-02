@@ -2060,10 +2060,24 @@ const Admin = (() => {
     let hotel = null;
     let hotelFromCheckin = null;
     let hotelFromTransfer = null;
-    const HOTEL_NAME_RE = /(?:^|\s)(?:в|to)\s+(?:отел[ья]\s+)?([A-ZА-ЯЁ][A-Za-zА-Яа-яЁё0-9\s&'\-.]{1,40})$/;
+    let expectHotelNameNext = false;
+    const HOTEL_NAME_RE = /(?:^|\s)(?:в|to)\s+(?:отел[ья]\s+)?([A-ZА-ЯЁ][A-Za-zА-Яа-яЁё0-9\s&',\-.]{1,60})$/;
     const DAY_COLORS = ['#C9353F', '#1D4ED8', '#047857', '#7C3AED', '#EA580C', '#6B7280'];
 
     for (const line of lines) {
+      // "Отель" / "Hotel" as its own header line, with the actual name on the next line
+      if (/^(?:отель|hotel)\s*:?\s*$/i.test(line)) {
+        expectHotelNameNext = true;
+        continue;
+      }
+      if (expectHotelNameNext) {
+        expectHotelNameNext = false;
+        if (!/^(?:день|day)\s*\d/i.test(line) && !/^\d{1,2}[:.]\d{2}/.test(line)) {
+          hotel = { name: line.replace(/[.,;]+$/, ''), address: '' };
+          continue;
+        }
+      }
+
       const hotelMatch = line.match(/^(?:отель|hotel)\s*[:\-–]\s*(.+)/i);
       if (hotelMatch) {
         const parts = hotelMatch[1].split(/[|—]/).map(s => s.trim()).filter(Boolean);
@@ -2086,7 +2100,7 @@ const Admin = (() => {
         continue;
       }
 
-      const timeMatch = line.match(/^(\d{1,2}[:.]\d{2})\s*[|—\-–]?\s*(.+)/);
+      const timeMatch = line.match(/^(\d{1,2}[:.]\d{2})(?:\s*[-–—]\s*\d{1,2}[:.]\d{2})?\s*[|—\-–]?\s*(.+)/);
       if (timeMatch && currentDay) {
         const time = timeMatch[1].replace('.', ':');
         const desc = timeMatch[2].trim();
