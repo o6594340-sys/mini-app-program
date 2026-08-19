@@ -1,4 +1,4 @@
-const CACHE = 'mice-v39';
+const CACHE = 'mice-v40';
 const OFFLINE = [
   '/',
   '/index.html',
@@ -10,7 +10,6 @@ const OFFLINE = [
   '/admin.html',
   '/css/admin.css',
   '/js/admin.js',
-  '/TN logo.jpg',
   '/photos/dolmabahce.jpg',
   '/photos/hagia-sofia.jpg',
   '/photos/cistern.jpg',
